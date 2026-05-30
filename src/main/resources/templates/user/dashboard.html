@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="tr" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kullanıcı Paneli - Dashboard</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        /* GLASSMORPHISM GLOBAL OVERRIDES */
+        body { 
+            font-family: 'Inter', sans-serif !important; 
+            background: radial-gradient(circle at top left, #e0e7ff, transparent 50%),
+                        radial-gradient(circle at top right, #fbcfe8, transparent 50%),
+                        radial-gradient(circle at bottom left, #cffafe, transparent 50%),
+                        radial-gradient(circle at bottom right, #ede9fe, transparent 50%) !important;
+            background-color: #f8fafc !important;
+            background-attachment: fixed !important;
+            color: #1e293b; 
+            min-height: 100vh;
+        }
+        
+        .card-stats, .stat-card, .dashboard-card { 
+            background: rgba(255, 255, 255, 0.6) !important;
+            backdrop-filter: blur(16px) !important;
+            -webkit-backdrop-filter: blur(16px) !important;
+            border: 1px solid rgba(255, 255, 255, 0.9) !important; 
+            border-radius: 24px !important;
+            transition: all 0.3s ease !important; 
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.05) !important;
+        }
+        .card-stats:hover, .stat-card:hover { transform: translateY(-5px) !important; box-shadow: 0 15px 35px rgba(0,0,0,0.1) !important; }
+        
+        .modern-card, .card { 
+            border-radius: 24px !important; 
+            overflow: hidden !important; 
+            border: 1px solid rgba(255, 255, 255, 0.8) !important; 
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.05) !important; 
+            background: rgba(255, 255, 255, 0.6) !important; 
+            backdrop-filter: blur(16px) !important;
+            -webkit-backdrop-filter: blur(16px) !important;
+        }
+        
+        .modern-card .card-header, .card-header {
+            background: rgba(255, 255, 255, 0.4) !important;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.5) !important;
+        }
+        
+        .modern-card .card-body, .card-body { background: transparent !important; }
+        
+        .table { background: transparent !important; }
+        .table thead th { background: rgba(255, 255, 255, 0.5) !important; border-bottom: 1px solid rgba(255, 255, 255, 0.8) !important; color: #475569 !important; font-weight: 600 !important; text-transform: uppercase !important; font-size: 0.8rem !important; letter-spacing: 0.05em !important; }
+        .table tbody tr { background: transparent !important; transition: all 0.2s !important; }
+        .table tbody tr:hover { background: rgba(255, 255, 255, 0.8) !important; }
+        .table tbody td { border-bottom: 1px solid rgba(255, 255, 255, 0.5) !important; vertical-align: middle !important; }
+        
+        .form-control, .form-select { border-radius: 12px !important; border: 1px solid rgba(255, 255, 255, 0.8) !important; background: rgba(255, 255, 255, 0.7) !important; font-size: 14px !important; }
+        .form-control:focus, .form-select:focus { border-color: #4f46e5 !important; box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1) !important; background: #fff !important; }
+
+        :root {
+            --bg-color: #f8fafc;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --card-bg: #ffffff;
+            --primary: #4f46e5;
+            --success: #10b981;
+            --danger: #ef4444;
+            --border: #e2e8f0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+        }
+
+        .content-area {
+            margin-left: 260px;
+            transition: all 0.3s;
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        .content-area.collapsed {
+            margin-left: 76px;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        .welcome-card {
+            background: linear-gradient(135deg, #4f46e5 0%, #312e81 100%);
+            border-radius: 20px;
+            color: #ffffff;
+            padding: 2.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 25px -5px rgba(79, 70, 229, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .welcome-card::after {
+            content: "";
+            position: absolute;
+            top: -20%;
+            right: -10%;
+            width: 300px;
+            height: 300px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        .welcome-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin: 0 0 0.5rem 0;
+        }
+
+        .welcome-subtitle {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 1.05rem;
+            margin: 0;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .stat-card {
+            background-color: var(--card-bg);
+            border-radius: 16px;
+            padding: 1.5rem;
+            border: 1px solid var(--border);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .stat-info h3 {
+            margin: 0;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+        }
+
+        .stat-value {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin: 0.5rem 0 0 0;
+            color: var(--text-main);
+        }
+
+        .stat-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .icon-blue { background-color: #eff6ff; color: #3b82f6; }
+        .icon-green { background-color: #ecfdf5; color: #10b981; }
+        .icon-red { background-color: #fef2f2; color: #ef4444; }
+        .icon-purple { background-color: #faf5ff; color: #a855f7; }
+        .icon-yellow { background-color: #fef3c7; color: #eab308; }
+
+        .dashboard-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 1.5rem;
+        }
+
+        @media (max-width: 900px) {
+            .dashboard-row {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 16px;
+            padding: 1.5rem;
+            border: 1px solid var(--border);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            margin-bottom: 1.5rem;
+        }
+
+        .card-header {
+            font-size: 1.15rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 0.75rem;
+        }
+
+        .activity-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .activity-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+
+        .book-details {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .book-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            background-color: #f1f5f9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary);
+            font-size: 1.1rem;
+        }
+
+        .book-name {
+            font-weight: 600;
+            font-size: 0.95rem;
+            margin: 0;
+        }
+
+        .book-author {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin: 2px 0 0 0;
+        }
+
+        .badge {
+            padding: 0.25rem 0.65rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .badge-success { background-color: #d1fae5; color: #065f46; }
+        .badge-warning { background-color: #fee2e2; color: #b91c1c; }
+        .badge-info { background-color: #e0f2fe; color: #075985; }
+
+        .reservation-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            padding: 0.85rem 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .reservation-item:last-child {
+            border-bottom: none;
+        }
+
+        .empty-message {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            padding: 1rem 0;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+
+<div th:replace="~{user/sidebar :: sidebar}"></div>
+
+<div class="content-area">
+    <div class="container">
+
+        <div class="welcome-card">
+            <h1 class="welcome-title">
+                Hoş Geldiniz, <span th:text="${kullanici.ad}">Kullanıcı</span>!
+            </h1>
+            <p class="welcome-subtitle">
+                Kütüphane hesabınızın durumunu ve ödünç işlemlerinizi buradan takip edebilirsiniz.
+            </p>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-info">
+                    <h3>Okuduğum Kitaplar</h3>
+                    <p class="stat-value" th:text="${myReadCount}">0</p>
+                </div>
+                <div class="stat-icon icon-green">
+                    <i class="fa-solid fa-square-check"></i>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-info">
+                    <h3>Şu An Üzerimdeki</h3>
+                    <p class="stat-value" th:text="${myActiveCount}">0</p>
+                </div>
+                <div class="stat-icon icon-yellow">
+                    <i class="fa-solid fa-book-open"></i>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-info">
+                    <h3>Aktif Rezervasyon</h3>
+                    <p class="stat-value" th:text="${myReservationsCount}">0</p>
+                </div>
+                <div class="stat-icon icon-purple">
+                    <i class="fa-solid fa-calendar-check"></i>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-info">
+                    <h3>Toplam Borcum</h3>
+                    <p class="stat-value" style="color: var(--danger)" th:text="${myFinesAmount}">0.00 ₺</p>
+                </div>
+                <div class="stat-icon icon-red">
+                    <i class="fa-solid fa-money-bill-wave"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="dashboard-row">
+
+            <div class="card">
+                <div class="card-header">
+                    <span>Şu An Üzerimdeki Kitaplar</span>
+                    <a th:href="@{/odunc-islemleri/user}"
+                       style="font-size: 0.85rem; text-decoration: none; color: var(--primary);">
+                        Tümünü Gör
+                    </a>
+                </div>
+
+                <ul class="activity-list" th:if="${currentBooks != null and !#lists.isEmpty(currentBooks)}">
+                    <li class="activity-item" th:each="book : ${currentBooks}">
+                        <div class="book-details">
+                            <div class="book-icon"
+                                 th:style="${book.durum == 'GECIKMIS'} ? 'color: var(--danger); background-color: #fef2f2;' : ''">
+                                <i th:class="${book.durum == 'GECIKMIS'} ? 'fa-solid fa-circle-exclamation' : 'fa-solid fa-book'"></i>
+                            </div>
+
+                            <div>
+                                <h4 class="book-name" th:text="${book.baslik}">Kitap Adı</h4>
+                                <p class="book-author" th:text="${book.yazar}">Yazar</p>
+                            </div>
+                        </div>
+
+                        <div style="text-align:right">
+                            <span th:if="${book.durum == 'GECIKMIS'}"
+                                  class="badge badge-warning">
+                                Gecikti
+                            </span>
+
+                            <span th:unless="${book.durum == 'GECIKMIS'}"
+                                  class="badge badge-success">
+                                Devam Ediyor
+                            </span>
+
+                            <p th:if="${book.durum == 'GECIKMIS'}"
+                               style="color: var(--danger); font-size:0.8rem; margin:4px 0 0 0; font-weight:600"
+                               th:text="${book.teslimTarihi != null ? 'Son İade: ' + #temporals.format(book.teslimTarihi,'dd/MM/yyyy') : 'Son İade: -'}"
+                                Son İade
+                            </p>
+
+                            <p th:unless="${book.durum == 'GECIKMIS'}"
+                               style="color: var(--text-muted); font-size:0.8rem; margin:4px 0 0 0"
+                               th:text="${book.teslimTarihi != null ? 'Son İade: ' + #temporals.format(book.teslimTarihi,'dd/MM/yyyy') : 'Son İade: -'}"
+                                Son İade
+                            </p>
+                        </div>
+                    </li>
+                </ul>
+
+                <div class="empty-message" th:if="${currentBooks == null or #lists.isEmpty(currentBooks)}">
+                    <i class="fa-solid fa-circle-info me-1"></i>
+                    Şu anda üzerinizde kitap bulunmuyor.
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <span>Aktif Rezervasyonlarım</span>
+                </div>
+
+                <div th:if="${activeReservations != null and !#lists.isEmpty(activeReservations)}">
+                    <div class="reservation-item" th:each="r : ${activeReservations}">
+                        <h5 class="book-name" th:text="${r.kitap != null ? r.kitap.baslik : 'Bilinmeyen Kitap'}">
+                            Kitap Adı
+                        </h5>
+
+                        <p class="book-author"
+                           th:text="${r.kitap != null && r.kitap.yazar != null ? r.kitap.yazar.ad + ' ' + r.kitap.yazar.soyad : '-'}">
+                            Yazar
+                        </p>
+
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:0.5rem">
+                            <span class="badge badge-info" th:text="${r.durum}">
+                                BEKLEMEDE
+                            </span>
+
+                            <span class="book-author" th:text="${r.rezervasyonTarihi != null ? 'Tarih: ' + #temporals.format(r.rezervasyonTarihi,'dd/MM/yyyy') : 'Tarih: -'}"
+                                Tarih
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="empty-message" th:if="${activeReservations == null or #lists.isEmpty(activeReservations)}">
+                    <i class="fa-solid fa-calendar-xmark me-1"></i>
+                    Aktif rezervasyonunuz bulunmuyor.
+                </div>
+            </div>
+
+        </div>
+
+        <div class="card" style="margin-top: 1.5rem;">
+            <div class="card-header">
+                <span><i class="fa-solid fa-bullhorn" style="color: #3b82f6; margin-right: 0.5rem;"></i>Duyuru Panosu</span>
+            </div>
+            <div style="padding: 1.5rem;">
+                <ul class="activity-list" th:if="${notices != null and !#lists.isEmpty(notices)}">
+                    <li class="activity-item" th:each="notice : ${notices}">
+                        <div class="book-details">
+                            <div class="book-icon" th:classappend="${notice.color}">
+                                <i class="fa-solid" th:classappend="${notice.icon}"></i>
+                            </div>
+                            <div>
+                                <h4 class="book-name" th:text="${notice.baslik}">Başlık</h4>
+                                <p class="book-author" th:text="${notice.mesaj}">Mesaj</p>
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+                <div class="empty-message" th:if="${notices == null or #lists.isEmpty(notices)}">
+                    <i class="fa-solid fa-check-circle me-1" style="color: var(--success);"></i>
+                    Şu anda herhangi bir uyarı veya duyuru bulunmuyor. Her şey yolunda!
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+</body>
+</html>

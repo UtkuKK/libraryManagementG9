@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="tr" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ceza İşlemleri - Personel Paneli</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        /* GLASSMORPHISM GLOBAL OVERRIDES */
+        body { 
+            font-family: 'Inter', sans-serif !important; 
+            background: radial-gradient(circle at top left, #e0e7ff, transparent 50%),
+                        radial-gradient(circle at top right, #fbcfe8, transparent 50%),
+                        radial-gradient(circle at bottom left, #cffafe, transparent 50%),
+                        radial-gradient(circle at bottom right, #ede9fe, transparent 50%) !important;
+            background-color: #f8fafc !important;
+            background-attachment: fixed !important;
+            color: #1e293b; 
+            min-height: 100vh;
+        }
+        
+        .card-stats, .stat-card, .dashboard-card { 
+            background: rgba(255, 255, 255, 0.6) !important;
+            backdrop-filter: blur(16px) !important;
+            -webkit-backdrop-filter: blur(16px) !important;
+            border: 1px solid rgba(255, 255, 255, 0.9) !important; 
+            border-radius: 24px !important;
+            transition: all 0.3s ease !important; 
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.05) !important;
+        }
+        .card-stats:hover, .stat-card:hover { transform: translateY(-5px) !important; box-shadow: 0 15px 35px rgba(0,0,0,0.1) !important; }
+        
+        .modern-card, .card { 
+            border-radius: 24px !important; 
+            overflow: hidden !important; 
+            border: 1px solid rgba(255, 255, 255, 0.8) !important; 
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.05) !important; 
+            background: rgba(255, 255, 255, 0.6) !important; 
+            backdrop-filter: blur(16px) !important;
+            -webkit-backdrop-filter: blur(16px) !important;
+        }
+        
+        .modern-card .card-header, .card-header {
+            background: rgba(255, 255, 255, 0.4) !important;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.5) !important;
+        }
+        
+        .modern-card .card-body, .card-body { background: transparent !important; }
+        
+        .table { background: transparent !important; }
+        .table thead th { background: rgba(255, 255, 255, 0.5) !important; border-bottom: 1px solid rgba(255, 255, 255, 0.8) !important; color: #475569 !important; font-weight: 600 !important; text-transform: uppercase !important; font-size: 0.8rem !important; letter-spacing: 0.05em !important; }
+        .table tbody tr { background: transparent !important; transition: all 0.2s !important; }
+        .table tbody tr:hover { background: rgba(255, 255, 255, 0.8) !important; }
+        .table tbody td { border-bottom: 1px solid rgba(255, 255, 255, 0.5) !important; vertical-align: middle !important; }
+        
+        .form-control, .form-select { border-radius: 12px !important; border: 1px solid rgba(255, 255, 255, 0.8) !important; background: rgba(255, 255, 255, 0.7) !important; font-size: 14px !important; }
+        .form-control:focus, .form-select:focus { border-color: #4f46e5 !important; box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1) !important; background: #fff !important; }
+
+        :root {
+            --bg-color: #f0f4f8;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --card-bg: #ffffff;
+            --primary: #3b82f6;
+            --primary-hover: #2563eb;
+            --success: #10b981;
+            --success-hover: #059669;
+            --danger: #ef4444;
+            --danger-hover: #dc2626;
+            --border: #e2e8f0;
+            --row-hover: #f8fafc;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+        }
+
+        .content-area {
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        h1 {
+            font-size: 2.25rem;
+            font-weight: 700;
+            margin: 0;
+            color: #0f172a;
+            letter-spacing: -0.02em;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 16px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -4px rgba(0, 0, 0, 0.025);
+            padding: 2rem;
+            border: 1px solid rgba(226, 232, 240, 0.8);
+            transition: box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.025);
+        }
+
+        .toolbar {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.625rem 1.25rem;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: none;
+            text-decoration: none;
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        }
+
+        .btn:active {
+            transform: translateY(1px);
+        }
+
+        .btn-success {
+            background-color: var(--success);
+            color: white;
+        }
+
+        .btn-success:hover:not(:disabled) {
+            background-color: var(--success-hover);
+            box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.3), 0 2px 4px -2px rgba(16, 185, 129, 0.3);
+        }
+
+        .btn-success:disabled {
+            background-color: #a7f3d0;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .table-container {
+            overflow-x: auto;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f8fafc;
+            padding: 1.25rem 1rem;
+            font-weight: 600;
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            border-bottom: 1px solid var(--border);
+        }
+
+        td {
+            padding: 1.25rem 1rem;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.95rem;
+            vertical-align: middle;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr {
+            transition: background-color 0.2s ease;
+            cursor: pointer;
+        }
+
+        tr:hover {
+            background-color: var(--row-hover);
+        }
+
+        /* Checkbox Styling */
+        .checkbox-cell {
+            width: 40px;
+            text-align: center;
+        }
+
+        .custom-checkbox {
+            appearance: none;
+            background-color: #fff;
+            margin: 0;
+            font: inherit;
+            color: currentColor;
+            width: 1.15em;
+            height: 1.15em;
+            border: 2px solid #cbd5e1;
+            border-radius: 4px;
+            display: grid;
+            place-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .custom-checkbox::before {
+            content: "";
+            width: 0.65em;
+            height: 0.65em;
+            transform: scale(0);
+            transition: 120ms transform ease-in-out;
+            box-shadow: inset 1em 1em white;
+            background-color: white;
+            transform-origin: center;
+            clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
+        }
+
+        .custom-checkbox:checked {
+            background-color: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .custom-checkbox:checked::before {
+            transform: scale(1);
+        }
+
+        .amount {
+            font-weight: 700;
+            color: var(--danger);
+            font-variant-numeric: tabular-nums;
+        }
+
+        .status-badge {
+            padding: 0.35rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.025em;
+        }
+
+        .status-unpaid {
+            background-color: #fee2e2;
+            color: #b91c1c;
+        }
+
+        .status-paid {
+            background-color: #d1fae5;
+            color: #047857;
+        }
+        
+        .description-cell {
+            max-width: 200px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            color: var(--text-muted);
+        }
+        
+        .selected-row {
+            background-color: #eff6ff !important;
+        }
+
+        /* Sortable Header CSS */
+        th.sortable {
+            cursor: pointer;
+            transition: background-color 0.2s;
+            user-select: none;
+        }
+        th.sortable:hover {
+            background-color: #e2e8f0;
+        }
+        th.sortable i {
+            margin-left: 5px;
+            color: #94a3b8;
+        }
+
+        /* Custom Modal CSS */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(4px);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        .custom-modal {
+            background: white;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            transform: translateY(20px) scale(0.95);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            opacity: 0;
+        }
+        .modal-overlay.active .custom-modal {
+            transform: translateY(0) scale(1);
+            opacity: 1;
+        }
+        .modal-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .modal-title {
+            margin: 0;
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #0f172a;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .btn-close {
+            background: transparent;
+            border: none;
+            font-size: 1.25rem;
+            color: #64748b;
+            cursor: pointer;
+            padding: 0.5rem;
+            line-height: 1;
+            border-radius: 8px;
+            transition: 0.2s;
+        }
+        .btn-close:hover {
+            background: #f1f5f9;
+            color: #0f172a;
+        }
+        .modal-body {
+            padding: 2rem 1.5rem;
+            text-align: center;
+            font-size: 1.1rem;
+            color: #475569;
+        }
+        .modal-footer {
+            padding: 1.25rem 1.5rem;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+            background: #f8fafc;
+            border-bottom-left-radius: 16px;
+            border-bottom-right-radius: 16px;
+        }
+        .btn-secondary {
+            background: white;
+            border: 1px solid #cbd5e1;
+            color: #475569;
+        }
+        .btn-secondary:hover {
+            background: #f1f5f9;
+        }
+    </style>
+</head>
+<body>
+    <div th:replace="~{staff/sidebar :: sidebar}" id="sidebar" class="sidebar">
+    <!-- Statik önizleme için -->
+    <div class="sidebar-header">
+        <h5 class="sidebar-title m-0">Library Staff</h5>
+        <button class="toggle-btn" id="sidebarToggle"><i class="fa-solid fa-bars"></i></button>
+    </div>
+    <ul class="nav flex-column mt-3">
+        <li class="nav-item"><a th:href="@{/staff/dashboard}" href="dashboard.html" class="nav-link"><i class="fa-solid fa-chart-pie"></i><span class="sidebar-text">Dashboard</span></a></li>
+        <li class="nav-item"><a href="#" class="nav-link"><i class="fa-solid fa-book"></i><span class="sidebar-text">Kitap Listeleri</span></a></li>
+        <li class="nav-item"><a href="#" class="nav-link"><i class="fa-solid fa-users"></i><span class="sidebar-text">Kullanıcılar</span></a></li>
+        <li class="nav-item"><a th:href="@{/odunc-islemleri/staff}" href="odunc.html" class="nav-link"><i class="fa-solid fa-hand-holding-hand"></i><span class="sidebar-text">Ödünç İşlemleri</span></a></li>
+        <li class="nav-item"><a th:href="@{/cezalar/staff}" href="ceza.html" class="nav-link"><i class="fa-solid fa-money-bill-wave"></i><span class="sidebar-text">Cezalar</span></a></li>
+        <li class="nav-item"><a href="#" class="nav-link"><i class="fa-solid fa-calendar-check"></i><span class="sidebar-text">Rezervasyonlar</span></a></li>
+    </ul>
+    <style>
+        .sidebar { width: 260px; background: #1e293b; color: #fff; min-height: 100vh; position: fixed; top: 0; left: 0; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); z-index: 1000; overflow-y: auto; box-shadow: 4px 0 10px rgba(0,0,0,0.1); }
+        .sidebar.collapsed { width: 76px; }
+        .sidebar-header { display: flex; justify-content: space-between; align-items: center; padding: 24px 20px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .sidebar.collapsed .sidebar-title { display: none; }
+        .sidebar .nav { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; }
+        .sidebar .nav-item { margin-bottom: 4px; }
+        .sidebar .nav-link { color: #cbd5e1; padding: 14px 24px; transition: 0.2s; white-space: nowrap; overflow: hidden; display: flex; align-items: center; text-decoration: none; font-size: 15px; font-weight: 500; }
+        .sidebar .nav-link:hover { color: #fff; background: rgba(255,255,255,0.1); border-left: 4px solid #3b82f6; padding-left: 20px; }
+        .sidebar .nav-link i { min-width: 32px; font-size: 1.25rem; text-align: center; margin-right: 12px; }
+        .sidebar.collapsed .nav-link i { margin-right: 0; }
+        .sidebar .sidebar-text { transition: opacity 0.3s; }
+        .sidebar.collapsed .sidebar-text { opacity: 0; display: none; }
+        .toggle-btn { background: transparent; color: #cbd5e1; border: none; font-size: 1.25rem; cursor: pointer; padding: 4px; border-radius: 4px; transition: 0.2s; }
+        .toggle-btn:hover { color: #fff; background: rgba(255,255,255,0.1); }
+        .content-area { margin-left: 260px; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); min-height: 100vh; }
+        .content-area.collapsed { margin-left: 76px; }
+    </style>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const sidebar = document.getElementById('sidebar');
+            const contentArea = document.querySelector('.content-area');
+            const toggleBtn = document.getElementById('sidebarToggle');
+            
+            // Check localStorage for sidebar state
+            if(localStorage.getItem('sidebarCollapsed') === 'true') {
+                if(sidebar) sidebar.classList.add('collapsed');
+                if(contentArea) contentArea.classList.add('collapsed');
+            }
+
+            if(toggleBtn) {
+                toggleBtn.addEventListener('click', function() {
+                    if(sidebar) sidebar.classList.toggle('collapsed');
+                    if(contentArea) contentArea.classList.toggle('collapsed');
+                    if(sidebar) localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'));
+                });
+            }
+        });
+    </script>
+    </div>
+    <div class="content-area">
+        <div class="container">
+        <div class="header">
+            <h1>Ceza İşlemleri</h1>
+        </div>
+        
+        <div class="card">
+            <div class="toolbar" style="justify-content: space-between; gap: 1rem; align-items: center;">
+                <div style="display: flex; gap: 10px; flex: 1; align-items: center; flex-wrap: wrap;">
+                    <input type="text" id="cezaSearchInput" class="form-control" placeholder="Kullanıcı veya Kitap ara..." style="max-width: 300px; padding: 0.5rem; border-radius: 6px; border: 1px solid #ccc;">
+                    <div class="btn-group" role="group">
+                        <input type="radio" class="btn-check" name="statusFilter" id="filterAll" value="Tümü" autocomplete="off" checked>
+                        <label class="btn btn-outline-secondary" for="filterAll">Tümü</label>
+                      
+                        <input type="radio" class="btn-check" name="statusFilter" id="filterUnpaid" value="Ödenmeyenler" autocomplete="off">
+                        <label class="btn btn-outline-danger" for="filterUnpaid">Ödenmeyenler</label>
+                      
+                        <input type="radio" class="btn-check" name="statusFilter" id="filterPaid" value="Ödenenler" autocomplete="off">
+                        <label class="btn btn-outline-success" for="filterPaid">Ödenenler</label>
+                    </div>
+                </div>
+                    
+                    <select id="tableSortSelect" class="form-select ms-2" style="max-width: 250px; padding: 0.5rem; border-radius: 6px; border: 1px solid #ccc;">
+                        <option value="default">Sıralama Seçiniz</option>
+                        <option value="az_kullanici">Kullanıcı (A-Z)</option>
+                        <option value="za_kullanici">Kullanıcı (Z-A)</option>
+                        <option value="az_kitap">Kitap (A-Z)</option>
+                        <option value="za_kitap">Kitap (Z-A)</option>
+                        <option value="ceza_cok">Ceza Miktarı (En Çok)</option>
+                        <option value="ceza_az">Ceza Miktarı (En Az)</option>
+                    </select>
+
+                <button id="btnNakitTahsilEt" class="btn btn-success" disabled>
+                    <svg style="width: 1.25rem; height: 1.25rem; margin-right: 0.5rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    Nakit Tahsil Et
+                </button>
+            </div>
+            
+            <div class="table-container">
+                <table id="cezaTable">
+                    <thead>
+                        <tr>
+                            <th class="checkbox-cell"></th>
+                            <th>Ceza ID</th>
+                            <th>Kullanıcı</th>
+                            <th>Kitap (Geciken)</th>
+                            <th>Gecikme Süresi</th>
+                            <th>Ceza Miktarı</th>
+                            <th>Açıklama</th>
+                            <th>Durum</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="ceza : ${cezalar}" th:data-id="${ceza.id}">
+                            <td class="checkbox-cell">
+                                <input type="checkbox" class="custom-checkbox row-checkbox" th:value="${ceza.id}">
+                            </td>
+                            <td th:text="'#' + ${ceza.id}">#502</td>
+                            <td th:text="${ceza.kullaniciAdi != null ? ceza.kullaniciAdi : ceza.kullaniciId}">Ayşe Demir</td>
+                            <td th:text="${ceza.kitapAdi != null ? ceza.kitapAdi : 'Bilinmiyor'}">Simyacı</td>
+                            <td>
+                                <span class="badge bg-danger text-white" th:if="${ceza.gecikmeGunu > 0}" th:text="${ceza.gecikmeGunu} + ' Gün'"></span>
+                                <span th:unless="${ceza.gecikmeGunu > 0}">-</span>
+                            </td>
+                            <td class="amount" th:text="${ceza.cezaMiktari} + ' ₺'">25.00 ₺</td>
+                            <td class="description-cell" th:title="${ceza.aciklama}" th:text="${ceza.aciklama}">Açıklama</td>
+                            <td>
+                                <span class="status-badge" th:classappend="${ceza.odendiMi ? 'status-paid' : 'status-unpaid'}" th:text="${ceza.odendiMi ? 'Ödendi' : 'Ödenmedi'}">Ödenmedi</span>
+                            </td>
+                        </tr>
+                        <tr th:if="${#lists.isEmpty(cezalar)}">
+                            <td colspan="8" style="text-align: center; color: #64748b; padding: 2rem;">Sistemde herhangi bir ceza kaydı bulunamadı.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Tahsilat Onay Modalı -->
+    <div class="modal-overlay" id="tahsilatModalOverlay">
+        <div class="custom-modal">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fa-solid fa-circle-exclamation" style="color: #f59e0b;"></i> Tahsilat Onayı
+                </h5>
+                <button type="button" class="btn-close" id="btnCloseModal"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body">
+                <p id="tahsilatModalText">Seçili cezaları tahsil etmek istediğinize emin misiniz?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" id="btnCancelModal">İptal</button>
+                <button type="button" class="btn btn-success" id="btnModalOnayla">Onayla ve Tahsil Et</button>
+            </div>
+        </div>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const btnNakitTahsilEt = document.getElementById('btnNakitTahsilEt');
+            const tableRows = document.querySelectorAll('tbody tr');
+
+            function updateButtonState() {
+                const anySelected = document.querySelectorAll('.selected-row').length > 0;
+                if(btnNakitTahsilEt) btnNakitTahsilEt.disabled = !anySelected;
+            }
+
+            // Row click logic (clicking anywhere on the row toggles selection)
+            tableRows.forEach(row => {
+                row.addEventListener('click', function(e) {
+                    if (e.target.tagName === 'INPUT') return;
+                    
+                    const cb = this.querySelector('.row-checkbox');
+                    if(cb) cb.checked = !cb.checked;
+                    
+                    this.classList.toggle('selected-row');
+                    updateButtonState();
+                });
+            });
+
+            // Checkbox change logic directly
+            const rowCheckboxes = document.querySelectorAll('.row-checkbox');
+            rowCheckboxes.forEach(cb => {
+                cb.addEventListener('change', function(e) {
+                    const row = this.closest('tr');
+                    if (this.checked) {
+                        row.classList.add('selected-row');
+                    } else {
+                        row.classList.remove('selected-row');
+                    }
+                    updateButtonState();
+                });
+            });
+
+            // Modal İşlemleri
+            const modalOverlay = document.getElementById('tahsilatModalOverlay');
+            const btnCloseModal = document.getElementById('btnCloseModal');
+            const btnCancelModal = document.getElementById('btnCancelModal');
+            
+            function openModal() {
+                if(modalOverlay) modalOverlay.classList.add('active');
+            }
+            
+            function closeModal() {
+                if(modalOverlay) modalOverlay.classList.remove('active');
+            }
+            
+            if(btnCloseModal) btnCloseModal.addEventListener('click', closeModal);
+            if(btnCancelModal) btnCancelModal.addEventListener('click', closeModal);
+            if(modalOverlay) modalOverlay.addEventListener('click', function(e) {
+                if (e.target === modalOverlay) closeModal();
+            });
+
+            // Tahsil Et Butonu click event (Modalı Açma)
+            let selectedIdsToPay = [];
+
+            if (btnNakitTahsilEt) {
+                btnNakitTahsilEt.addEventListener('click', function() {
+                    const selectedRows = document.querySelectorAll('.selected-row');
+                    selectedIdsToPay = Array.from(selectedRows).map(row => row.getAttribute('data-id'));
+                    
+                    if (selectedIdsToPay.length > 0) {
+                        const modalText = document.getElementById('tahsilatModalText');
+                        if(modalText) {
+                            modalText.innerHTML = `<strong>${selectedIdsToPay.length}</strong> adet ceza ödemesini tahsil etmek ve kapatmak istediğinize emin misiniz?`;
+                        }
+                        openModal();
+                    }
+                });
+            }
+
+            // Modal Onayla Butonu
+            const btnModalOnayla = document.getElementById('btnModalOnayla');
+            if (btnModalOnayla) {
+                btnModalOnayla.addEventListener('click', function() {
+                    // Butonu disabled yap ve metni değiştir (Loading durumu)
+                    this.disabled = true;
+                    this.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>İşleniyor...';
+                    
+                    processPayments(selectedIdsToPay);
+                });
+            }
+
+            // Ödemeleri arka planda işleyen fonksiyon
+            function processPayments(ids) {
+                const requests = ids.map(id => fetch(`/cezalar/tahsil-et/${id}`));
+                
+                Promise.all(requests).then(() => {
+                    window.location.reload();
+                }).catch(err => {
+                    console.error("Tahsilat sırasında hata oluştu:", err);
+                    alert("Tahsilat işlemi sırasında bir hata oluştu.");
+                    closeModal();
+                });
+            }
+
+            // Arama, Filtreleme ve Sıralama İşlemleri
+            const cezaSearchInput = document.getElementById('cezaSearchInput');
+            const statusFilters = document.querySelectorAll('input[name="statusFilter"]');
+            const tbody = document.querySelector('tbody');
+            const sortableHeaders = document.querySelectorAll('th.sortable');
+            
+            let itemsPerPage = 30;
+            let currentlyShown = itemsPerPage;
+            let currentSortColumn = null;
+            let sortAscending = true;
+
+            function applyFilters() {
+                const searchTerm = cezaSearchInput ? cezaSearchInput.value.toLowerCase() : '';
+                let selectedStatus = 'Tümü';
+                const checkedStatus = document.querySelector('input[name="statusFilter"]:checked');
+                if (checkedStatus) {
+                    selectedStatus = checkedStatus.value;
+                }
+                const rows = Array.from(tbody.querySelectorAll('tr[data-id]')); 
+
+                let visibleRows = [];
+
+                rows.forEach(row => {
+                    const textContent = row.textContent.toLowerCase();
+                    const isPaid = row.querySelector('.status-paid') !== null;
+                    const isUnpaid = row.querySelector('.status-unpaid') !== null;
+                    
+                    let statusMatch = true;
+                    if (selectedStatus === 'Ödenmeyenler') {
+                        statusMatch = isUnpaid;
+                    } else if (selectedStatus === 'Ödenenler') {
+                        statusMatch = isPaid;
+                    }
+
+                    if (textContent.includes(searchTerm) && statusMatch) {
+                        visibleRows.push(row);
+                    } else {
+                        row.style.display = 'none';
+                        row.classList.remove('selected-row');
+                        const cb = row.querySelector('.row-checkbox');
+                        if (cb) cb.checked = false;
+                    }
+                });
+
+                const sortMode = document.getElementById('tableSortSelect') ? document.getElementById('tableSortSelect').value : 'default';
+
+                if (sortMode !== 'default') {
+                    visibleRows.sort((a, b) => {
+                        let valA = '', valB = '';
+                        if (sortMode.includes('kullanici')) {
+                            valA = a.cells[2].textContent.trim().toLowerCase();
+                            valB = b.cells[2].textContent.trim().toLowerCase();
+                        } else if (sortMode.includes('kitap')) {
+                            valA = a.cells[3].textContent.trim().toLowerCase();
+                            valB = b.cells[3].textContent.trim().toLowerCase();
+                        } else if (sortMode.includes('ceza')) {
+                            valA = parseFloat(a.cells[5].textContent.replace(',', '.').replace(/[^\d.-]/g, '')) || 0;
+                            valB = parseFloat(b.cells[5].textContent.replace(',', '.').replace(/[^\d.-]/g, '')) || 0;
+                        }
+
+                        if (valA < valB) return sortMode.startsWith('za_') || sortMode.endsWith('_cok') ? 1 : -1;
+                        if (valA > valB) return sortMode.startsWith('za_') || sortMode.endsWith('_cok') ? -1 : 1;
+                        return 0;
+                    });
+                    
+                    visibleRows.forEach(row => tbody.appendChild(row));
+                }
+
+                visibleRows.forEach((row, index) => {
+                    if (index < currentlyShown) {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+
+                let loadMoreContainer = document.getElementById('loadMoreContainer');
+                if (visibleRows.length > currentlyShown) {
+                    if (!loadMoreContainer) {
+                        loadMoreContainer = document.createElement('div');
+                        loadMoreContainer.id = 'loadMoreContainer';
+                        loadMoreContainer.className = 'text-center mt-4 mb-2';
+                        loadMoreContainer.innerHTML = '<button id="loadMoreBtn" class="btn btn-outline-primary fw-bold" style="border-radius: 8px; padding: 8px 24px;"><i class="fa-solid fa-arrow-down me-2"></i>Daha Fazla Yükle</button>';
+                        document.querySelector('.table-container').after(loadMoreContainer);
+                        
+                        document.getElementById('loadMoreBtn').addEventListener('click', function() {
+                            currentlyShown += itemsPerPage;
+                            applyFilters();
+                        });
+                    } else {
+                        loadMoreContainer.style.display = '';
+                    }
+                } else {
+                    if (loadMoreContainer) loadMoreContainer.style.display = 'none';
+                }
+
+                updateButtonState();
+            }
+
+            const tableSortSelect = document.getElementById('tableSortSelect');
+            if (cezaSearchInput) cezaSearchInput.addEventListener('input', () => { currentlyShown = itemsPerPage; applyFilters(); });
+            statusFilters.forEach(radio => {
+                radio.addEventListener('change', () => { currentlyShown = itemsPerPage; applyFilters(); });
+            });
+            if (tableSortSelect) tableSortSelect.addEventListener('change', () => { currentlyShown = itemsPerPage; applyFilters(); });
+
+            sortableHeaders.forEach(header => {
+                header.addEventListener('click', () => {
+                    const sortMode = header.getAttribute('data-sort');
+                    if (currentSortColumn === sortMode) {
+                        sortAscending = !sortAscending;
+                    } else {
+                        currentSortColumn = sortMode;
+                        sortAscending = true;
+                    }
+
+                    sortableHeaders.forEach(th => {
+                        const icon = th.querySelector('i');
+                        if(icon) icon.className = 'fa-solid fa-sort';
+                    });
+                    
+                    const icon = header.querySelector('i');
+                    if(icon) icon.className = sortAscending ? 'fa-solid fa-sort-up text-primary' : 'fa-solid fa-sort-down text-primary';
+
+                    currentlyShown = itemsPerPage;
+                    applyFilters();
+                });
+            });
+            
+            // Sayfa açılışında çalıştır
+            applyFilters();
+        });
+    </script>
+    </div>
+</body>
+</html>

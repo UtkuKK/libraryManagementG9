@@ -1,0 +1,1205 @@
+<!DOCTYPE html>
+<html lang="tr" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ödünç İşlemlerim - Kullanıcı Paneli</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* GLASSMORPHISM GLOBAL OVERRIDES */
+        body { 
+            font-family: 'Inter', sans-serif !important; 
+            background: radial-gradient(circle at top left, #e0e7ff, transparent 50%),
+                        radial-gradient(circle at top right, #fbcfe8, transparent 50%),
+                        radial-gradient(circle at bottom left, #cffafe, transparent 50%),
+                        radial-gradient(circle at bottom right, #ede9fe, transparent 50%) !important;
+            background-color: #f8fafc !important;
+            background-attachment: fixed !important;
+            color: #1e293b; 
+            min-height: 100vh;
+        }
+        
+        .card-stats, .stat-card, .dashboard-card { 
+            background: rgba(255, 255, 255, 0.6) !important;
+            backdrop-filter: blur(16px) !important;
+            -webkit-backdrop-filter: blur(16px) !important;
+            border: 1px solid rgba(255, 255, 255, 0.9) !important; 
+            border-radius: 24px !important;
+            transition: all 0.3s ease !important; 
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.05) !important;
+        }
+        .card-stats:hover, .stat-card:hover { transform: translateY(-5px) !important; box-shadow: 0 15px 35px rgba(0,0,0,0.1) !important; }
+        
+        .modern-card, .card { 
+            border-radius: 24px !important; 
+            overflow: hidden !important; 
+            border: 1px solid rgba(255, 255, 255, 0.8) !important; 
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.05) !important; 
+            background: rgba(255, 255, 255, 0.6) !important; 
+            backdrop-filter: blur(16px) !important;
+            -webkit-backdrop-filter: blur(16px) !important;
+        }
+        
+        .modern-card .card-header, .card-header {
+            background: rgba(255, 255, 255, 0.4) !important;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.5) !important;
+        }
+        
+        .modern-card .card-body, .card-body { background: transparent !important; }
+        
+        .table { background: transparent !important; }
+        .table thead th { background: rgba(255, 255, 255, 0.5) !important; border-bottom: 1px solid rgba(255, 255, 255, 0.8) !important; color: #475569 !important; font-weight: 600 !important; text-transform: uppercase !important; font-size: 0.8rem !important; letter-spacing: 0.05em !important; }
+        .table tbody tr { background: transparent !important; transition: all 0.2s !important; }
+        .table tbody tr:hover { background: rgba(255, 255, 255, 0.8) !important; }
+        .table tbody td { border-bottom: 1px solid rgba(255, 255, 255, 0.5) !important; vertical-align: middle !important; }
+        
+        .form-control, .form-select { border-radius: 12px !important; border: 1px solid rgba(255, 255, 255, 0.8) !important; background: rgba(255, 255, 255, 0.7) !important; font-size: 14px !important; }
+        .form-control:focus, .form-select:focus { border-color: #4f46e5 !important; box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1) !important; background: #fff !important; }
+
+        :root {
+            --bg-color: #f8fafc;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --card-bg: #ffffff;
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --success: #10b981;
+            --danger: #ef4444;
+            --danger-hover: #dc2626;
+            --border: #e2e8f0;
+            --row-hover: #f1f5f9;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        .page-header {
+            margin-bottom: 2rem;
+        }
+
+        h1 {
+            font-size: 2.25rem;
+            font-weight: 700;
+            margin: 0;
+            color: #0f172a;
+            letter-spacing: -0.02em;
+        }
+        
+        p.subtitle {
+            color: var(--text-muted);
+            margin-top: 0.5rem;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 16px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -4px rgba(0, 0, 0, 0.025);
+            padding: 2rem;
+            border: 1px solid rgba(226, 232, 240, 0.8);
+            margin-bottom: 2rem;
+            transition: box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.025);
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-top: 0;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* Tabs Styling */
+        .tabs-container {
+            display: flex;
+            background-color: #f1f5f9;
+            padding: 0.25rem;
+            border-radius: 9999px;
+            width: fit-content;
+            margin-bottom: 1.5rem;
+        }
+
+        .tab-btn {
+            padding: 0.5rem 1.5rem;
+            border-radius: 9999px;
+            border: none;
+            background: transparent;
+            font-weight: 600;
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .tab-btn.active {
+            background-color: white;
+            color: var(--primary);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Table Styling */
+        .table-container {
+            overflow-x: auto;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f8fafc;
+            padding: 1rem;
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            border-bottom: 1px solid var(--border);
+        }
+
+        td {
+            padding: 1.25rem 1rem;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.95rem;
+            vertical-align: middle;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr {
+            transition: background-color 0.2s ease;
+        }
+
+        tr.selectable-row {
+            cursor: pointer;
+        }
+
+        tr:hover {
+            background-color: var(--row-hover);
+        }
+
+        .selected-row {
+            background-color: #eff6ff !important;
+        }
+
+        /* Badges */
+        .status-badge {
+            padding: 0.35rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.025em;
+            display: inline-block;
+        }
+
+        .status-active { background-color: #dbeafe; color: #1e40af; }
+        .status-returned { background-color: #d1fae5; color: #047857; }
+        .status-overdue { background-color: #fee2e2; color: #b91c1c; }
+
+        /* Button Styling */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.625rem 1.25rem;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: none;
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background-color: var(--primary-hover);
+            transform: translateY(-1px);
+        }
+        
+        .btn-danger {
+            background-color: var(--danger);
+            color: white;
+        }
+
+        .btn-danger:hover:not(:disabled) {
+            background-color: var(--danger-hover);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 6px -1px rgba(239, 68, 68, 0.3), 0 2px 4px -2px rgba(239, 68, 68, 0.3);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            box-shadow: none;
+            transform: none !important;
+        }
+
+        .toolbar {
+            margin-top: 1.5rem;
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        /* Checkbox Styling */
+        .checkbox-cell {
+            width: 40px;
+            text-align: center;
+        }
+
+        .custom-checkbox {
+            appearance: none;
+            background-color: #fff;
+            margin: 0;
+            font: inherit;
+            color: currentColor;
+            width: 1.15em;
+            height: 1.15em;
+            border: 2px solid #cbd5e1;
+            border-radius: 4px;
+            display: grid;
+            place-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .custom-checkbox::before {
+            content: "";
+            width: 0.65em;
+            height: 0.65em;
+            transform: scale(0);
+            transition: 120ms transform ease-in-out;
+            box-shadow: inset 1em 1em white;
+            background-color: white;
+            transform-origin: center;
+            clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
+        }
+
+        .custom-checkbox:checked {
+            background-color: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .custom-checkbox:checked::before {
+            transform: scale(1);
+        }
+
+        .amount {
+            font-weight: 700;
+            color: var(--danger);
+            font-variant-numeric: tabular-nums;
+        }
+
+        /* Modal Overlay & Transitions */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(8px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .payment-modal {
+            background-color: #ffffff;
+            border-radius: 24px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+            transform: scale(0.9);
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            overflow: hidden;
+        }
+
+        .modal-overlay.active .payment-modal {
+            transform: scale(1);
+        }
+
+        .modal-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-main);
+            margin: 0;
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .close-modal:hover {
+            color: var(--danger);
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+        }
+
+        /* Virtual Credit Card */
+        .card-container {
+            width: 100%;
+            height: 200px;
+            perspective: 1000px;
+            margin-bottom: 1.5rem;
+        }
+
+        .virtual-card {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            border-radius: 16px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        .virtual-card.flipped {
+            transform: rotateY(180deg);
+        }
+
+        .card-front, .card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+            border-radius: 16px;
+            color: #fff;
+            padding: 1.5rem;
+            box-sizing: border-box;
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .card-back {
+            transform: rotateY(180deg);
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            padding: 0;
+            justify-content: flex-start;
+        }
+
+        .card-chip {
+            width: 48px;
+            height: 35px;
+            background: linear-gradient(135deg, #ffd700 0%, #b8860b 100%);
+            border-radius: 6px;
+            margin-bottom: 1rem;
+        }
+
+        .card-number {
+            font-size: 1.35rem;
+            font-weight: 600;
+            letter-spacing: 2px;
+            word-spacing: 4px;
+            margin-bottom: 1rem;
+            font-family: monospace;
+        }
+
+        .card-info-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+        }
+
+        .card-label {
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #94a3b8;
+            margin-bottom: 0.25rem;
+        }
+
+        .card-value {
+            font-size: 0.9rem;
+            font-weight: 500;
+            text-transform: uppercase;
+        }
+
+        .card-black-bar {
+            width: 100%;
+            height: 45px;
+            background: #000;
+            margin-top: 1.5rem;
+        }
+
+        .card-signature-bar {
+            width: 80%;
+            height: 35px;
+            background: #e2e8f0;
+            margin: 1rem 10% 0 10%;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 15px;
+            color: #0f172a;
+            font-weight: 600;
+            font-style: italic;
+            font-family: monospace;
+            border-radius: 4px;
+        }
+
+        /* Inputs */
+        .form-row {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .form-group {
+            flex: 1;
+            margin-bottom: 1rem;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            margin-bottom: 0.4rem;
+        }
+
+        .form-input {
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
+        }
+
+        /* Loader & Success */
+        .payment-loader {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.96);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+
+        .payment-loader.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f1f5f9;
+            border-top: 5px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 1rem;
+        }
+
+        .success-checkmark {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: #d1fae5;
+            color: #059669;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            animation: popCheckmark 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes popCheckmark {
+            0% { transform: scale(0.5); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+
+<div th:replace="~{user/sidebar :: sidebar}" id="sidebar" class="sidebar">
+    <!-- Statik önizleme için (Thymeleaf çalıştırılmadığında tarayıcının göreceği kod) -->
+    <div class="sidebar-header">
+        <h5 class="sidebar-title m-0">Library User</h5>
+        <button class="toggle-btn" id="sidebarToggle"><i class="fa-solid fa-bars"></i></button>
+    </div>
+    <ul class="nav flex-column mt-3">
+        <li class="nav-item"><a th:href="@{/user/dashboard}" href="dashboard.html" class="nav-link"><i class="fa-solid fa-chart-pie"></i><span class="sidebar-text">Dashboard</span></a></li>
+        <li class="nav-item"><a href="#" class="nav-link"><i class="fa-solid fa-book"></i><span class="sidebar-text">Kitaplarım</span></a></li>
+        <li class="nav-item"><a th:href="@{/odunc-islemleri/user}" href="odunc.html" class="nav-link"><i class="fa-solid fa-credit-card"></i><span class="sidebar-text">Ceza Ödeme</span></a></li>
+        <li class="nav-item"><a href="#" class="nav-link"><i class="fa-solid fa-calendar-check"></i><span class="sidebar-text">Rezervasyonlar</span></a></li>
+        <li class="nav-item"><a href="#" class="nav-link"><i class="fa-solid fa-user-gear"></i><span class="sidebar-text">Hesap Ayarları</span></a></li>
+    </ul>
+    <style>
+        .sidebar { width: 260px; background: #0f172a; color: #fff; min-height: 100vh; position: fixed; top: 0; left: 0; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); z-index: 1000; overflow-y: auto; box-shadow: 4px 0 10px rgba(0,0,0,0.1); }
+        .sidebar.collapsed { width: 76px; }
+        .sidebar-header { display: flex; justify-content: space-between; align-items: center; padding: 24px 20px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .sidebar.collapsed .sidebar-title { display: none; }
+        .sidebar .nav { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; }
+        .sidebar .nav-item { margin-bottom: 4px; }
+        .sidebar .nav-link { color: #cbd5e1; padding: 14px 24px; transition: 0.2s; white-space: nowrap; overflow: hidden; display: flex; align-items: center; text-decoration: none; font-size: 15px; font-weight: 500; }
+        .sidebar .nav-link:hover { color: #fff; background: rgba(255,255,255,0.1); border-left: 4px solid #4f46e5; padding-left: 20px; }
+        .sidebar .nav-link i { min-width: 32px; font-size: 1.25rem; text-align: center; margin-right: 12px; }
+        .sidebar.collapsed .nav-link i { margin-right: 0; }
+        .sidebar .sidebar-text { transition: opacity 0.3s; }
+        .sidebar.collapsed .sidebar-text { opacity: 0; display: none; }
+        .toggle-btn { background: transparent; color: #cbd5e1; border: none; font-size: 1.25rem; cursor: pointer; padding: 4px; border-radius: 4px; transition: 0.2s; }
+        .toggle-btn:hover { color: #fff; background: rgba(255,255,255,0.1); }
+        .content-area { margin-left: 260px; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); min-height: 100vh; padding: 2rem; }
+        .content-area.collapsed { margin-left: 76px; }
+    </style>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const sidebar = document.getElementById('sidebar');
+            const contentArea = document.querySelector('.content-area');
+            const toggleBtn = document.getElementById('sidebarToggle');
+            
+            if(localStorage.getItem('sidebarCollapsed') === 'true') {
+                sidebar.classList.add('collapsed');
+                if(contentArea) contentArea.classList.add('collapsed');
+            }
+
+            if(toggleBtn) {
+                toggleBtn.addEventListener('click', function() {
+                    sidebar.classList.toggle('collapsed');
+                    if(contentArea) contentArea.classList.toggle('collapsed');
+                    localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'));
+                });
+            }
+        });
+    </script>
+</div>
+
+<div class="content-area">
+    <div class="container">
+        <div class="page-header">
+            <h1>Ödünç İşlemlerim</h1>
+            <p class="subtitle">Kitap ödünç alma geçmişinizi ve cezalarınızı bu alandan yönetebilirsiniz.</p>
+        </div>
+        
+        <!-- Bilgi Kartları -->
+        <div style="display: flex; gap: 1.5rem; margin-bottom: 2rem;">
+            <div style="flex: 1; background-color: var(--card-bg); border-radius: 12px; padding: 1.5rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); border: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between;">
+                <div>
+                    <h3 style="margin: 0; font-size: 0.9rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em;">Devam Eden Kitaplar</h3>
+                    <p id="infoDevamEden" style="margin: 0.5rem 0 0 0; font-size: 1.75rem; font-weight: 700; color: #1e40af;">0</p>
+                </div>
+                <div style="width: 48px; height: 48px; border-radius: 50%; background-color: #dbeafe; display: flex; align-items: center; justify-content: center; color: #1e40af;">
+                    <i class="fa-solid fa-book-open" style="font-size: 1.25rem;"></i>
+                </div>
+            </div>
+            <div style="flex: 1; background-color: var(--card-bg); border-radius: 12px; padding: 1.5rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); border: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between;">
+                <div>
+                    <h3 style="margin: 0; font-size: 0.9rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em;">Geciken Kitaplar</h3>
+                    <p id="infoGeciken" style="margin: 0.5rem 0 0 0; font-size: 1.75rem; font-weight: 700; color: #b91c1c;">0</p>
+                </div>
+                <div style="width: 48px; height: 48px; border-radius: 50%; background-color: #fee2e2; display: flex; align-items: center; justify-content: center; color: #b91c1c;">
+                    <i class="fa-solid fa-triangle-exclamation" style="font-size: 1.25rem;"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Ödünç Listesi Kartı -->
+        <div class="card">
+            <div class="card-title">Kitap Listem</div>
+            
+            <div class="toolbar" style="justify-content: space-between; gap: 1rem; align-items: center; margin-top: 0; margin-bottom: 1.5rem;">
+                    <div class="btn-group" role="group" aria-label="Filtreleme">
+                        <input type="radio" class="btn-check status-filter" name="statusFilter" value="Tümü" id="filterAll" autocomplete="off" checked>
+                        <label class="btn btn-outline-secondary" for="filterAll">Tümü</label>
+
+                        <input type="radio" class="btn-check status-filter" name="statusFilter" value="Devam Edenler" id="filterDevam" autocomplete="off">
+                        <label class="btn btn-outline-primary" for="filterDevam">Devam Edenler</label>
+
+                        <input type="radio" class="btn-check status-filter" name="statusFilter" value="Gecikenler" id="filterGecikti" autocomplete="off">
+                        <label class="btn btn-outline-danger" for="filterGecikti">Gecikenler</label>
+
+                        <input type="radio" class="btn-check status-filter" name="statusFilter" value="İade Edilenler" id="filterIade" autocomplete="off">
+                        <label class="btn btn-outline-success" for="filterIade">İade Edilenler</label>
+                    </div>
+                <div style="display: flex; gap: 10px; flex: 1; justify-content: flex-end;">
+                    <input type="text" id="oduncSearchInput" class="form-control" placeholder="Kitap veya Yazar ara..." style="max-width: 300px; padding: 0.5rem; border-radius: 6px; border: 1px solid #ccc;">
+                    <select id="oduncSortSelect" class="form-select" style="max-width: 250px; padding: 0.5rem; border-radius: 6px; border: 1px solid #ccc;">
+                        <option value="default">Sıralama (Varsayılan)</option>
+                        <option value="az_kitap">Kitap (A-Z)</option>
+                        <option value="za_kitap">Kitap (Z-A)</option>
+                        <option value="tarih_yeni">Alış Tarihi (En Yeni)</option>
+                        <option value="tarih_eski">Alış Tarihi (En Eski)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="table-container">
+                <table id="userOduncTable">
+                    <thead>
+                        <tr>
+                            <th>Kitap Adı</th>
+                            <th>Yazar</th>
+                            <th>Alış Tarihi</th>
+                            <th>İade/Son İade Tarihi</th>
+                            <th>Kalan Gün</th>
+                            <th>Durum</th>
+                        </tr>
+                    </thead>
+                    <tbody id="userOduncBody">
+                        <tr th:each="odunc : ${oduncler}" class="odunc-row">
+                            <td><span style="font-weight: 500;" th:text="${odunc.kitapBaslik != null ? odunc.kitapBaslik : 'Bilinmiyor'}">Sefiller</span></td>
+                            <td th:text="${odunc.kitapYazari != null ? odunc.kitapYazari : '-'}">Victor Hugo</td>
+                            <td th:text="${odunc.verilisTarihi != null ? #temporals.format(odunc.verilisTarihi, 'dd/MM/yyyy') : '-'}">12/05/2026</td>
+                            <td th:text="${odunc.teslimTarihi != null ? #temporals.format(odunc.teslimTarihi, 'dd/MM/yyyy') : '-'}">26/05/2026</td>
+                            <td th:if="${odunc.durum == 'TAMAMLANDI' or odunc.durum == 'TESLIM_EDILDI'}">-</td>
+                            <td th:unless="${odunc.durum == 'TAMAMLANDI' or odunc.durum == 'TESLIM_EDILDI'}" 
+                                th:text="${odunc.kalanGunSayisi() > 0 ? odunc.kalanGunSayisi() + ' Gün' : (odunc.kalanGunSayisi() < 0 ? 'Geçti' : 'Bugün')}"
+                                th:style="${odunc.kalanGunSayisi() < 0 ? 'color: var(--danger); font-weight: 600;' : ''}">11 Gün</td>
+                            <td>
+                                <span class="status-badge" 
+                                      th:classappend="${(odunc.durum == 'TAMAMLANDI' or odunc.durum == 'TESLIM_EDILDI') ? 'status-returned' : (odunc.durum == 'GECIKMIS' ? 'status-overdue' : 'status-active')}" 
+                                      th:text="${(odunc.durum == 'TAMAMLANDI' or odunc.durum == 'TESLIM_EDILDI') ? 'İade Edilenler' : (odunc.durum == 'GECIKMIS' ? 'Gecikenler' : 'Devam Edenler')}">
+                                    Devam Edenler
+                                </span>
+                            </td>
+                        </tr>
+                        <tr th:if="${#lists.isEmpty(oduncler)}">
+                            <td colspan="6" class="text-center" style="padding: 2rem;">Hiç ödünç aldığınız kitap bulunmamaktadır.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Cezalar Kartı -->
+        <div class="card">
+            <div class="card-title">Sistem Cezalarım</div>
+            
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th class="checkbox-cell">
+                                <input type="checkbox" id="selectAllPenalties" class="custom-checkbox">
+                            </th>
+                            <th>Ceza ID</th>
+                            <th>Kitap (Geciken)</th>
+                            <th>Gecikme Süresi</th>
+                            <th>Açıklama</th>
+                            <th>Tutar</th>
+                            <th>Durum</th>
+                        </tr>
+                    </thead>
+                    <tbody id="penaltiesBody">
+                        <tr class="selectable-row" th:each="ceza : ${cezalar}">
+                            <td class="checkbox-cell">
+                                <input type="checkbox" class="custom-checkbox penalty-checkbox" th:value="${ceza.id}">
+                            </td>
+                            <td th:text="'#' + ${ceza.id}">#101</td>
+                            <td><span style="font-weight: 500;" th:text="${ceza.kitapAdi != null ? ceza.kitapAdi : 'Bilinmiyor'}">Simyacı</span></td>
+                            <td th:text="${ceza.gecikmeGunu > 0 ? ceza.gecikmeGunu + ' Gün' : '-'}">3 Gün</td>
+                            <td th:text="${ceza.aciklama}">Açıklama</td>
+                            <td class="amount" th:text="${ceza.cezaMiktari} + ' ₺'">15.00 ₺</td>
+                            <td>
+                                <span class="status-badge" th:classappend="${ceza.odendiMi ? 'status-returned' : 'status-overdue'}" 
+                                      th:text="${ceza.odendiMi ? 'Ödendi' : 'Ödenmedi'}">Ödenmedi</span>
+                            </td>
+                        </tr>
+                        <tr th:if="${#lists.isEmpty(cezalar)}">
+                            <td colspan="7" class="text-center" style="padding: 2rem;">Hiç cezanız bulunmamaktadır.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="toolbar">
+                <button id="btnPayPenalty" class="btn btn-primary" disabled>
+                    <svg style="width: 1.25rem; height: 1.25rem; margin-right: 0.5rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path></svg>
+                    Seçili Cezayı Öde
+                </button>
+            </div>
+        </div>
+    </div>
+</div> <!-- content-area end -->
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Kitap Listem Arama ve Filtreleme İşlemleri
+            const oduncSearchInput = document.getElementById('oduncSearchInput');
+            const oduncSortSelect = document.getElementById('oduncSortSelect');
+            const statusFilters = document.querySelectorAll('.status-filter');
+            const userOduncBody = document.getElementById('userOduncBody');
+
+            function applyOduncFilters() {
+                if(!userOduncBody) return;
+                const searchTerm = oduncSearchInput.value.toLowerCase();
+                const sortMode = oduncSortSelect.value;
+                const rows = Array.from(userOduncBody.querySelectorAll('.odunc-row'));
+                
+                // Seçili durumları al
+                const selectedStatusCb = Array.from(statusFilters).find(cb => cb.checked);
+                const selectedStatus = selectedStatusCb ? selectedStatusCb.value : 'Tümü';
+
+                // Filtreleme
+                rows.forEach(row => {
+                    const textContent = row.textContent.toLowerCase();
+                    const statusText = row.querySelector('.status-badge').textContent.trim();
+                    
+                    const matchesSearch = textContent.includes(searchTerm);
+                    const matchesStatus = (selectedStatus === 'Tümü' || selectedStatus === statusText);
+                    
+                    if (matchesSearch && matchesStatus) {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+
+                // Sıralama
+                if (sortMode !== 'default') {
+                    const visibleRows = rows.filter(row => row.style.display !== 'none');
+                    visibleRows.sort((a, b) => {
+                        let valA = '', valB = '';
+                        
+                        if (sortMode.includes('kitap')) {
+                            valA = a.cells[0].textContent.trim().toLowerCase();
+                            valB = b.cells[0].textContent.trim().toLowerCase();
+                        } else if (sortMode.includes('tarih')) {
+                            const dateA = a.cells[2].textContent.trim().split('.');
+                            const dateB = b.cells[2].textContent.trim().split('.');
+                            valA = dateA.length === 3 ? dateA[2]+dateA[1]+dateA[0] : '';
+                            valB = dateB.length === 3 ? dateB[2]+dateB[1]+dateB[0] : '';
+                        }
+
+                        if (valA < valB) return sortMode.startsWith('az') || sortMode.endsWith('eski') ? -1 : 1;
+                        if (valA > valB) return sortMode.startsWith('az') || sortMode.endsWith('eski') ? 1 : -1;
+                        return 0;
+                    });
+
+                    visibleRows.forEach(row => userOduncBody.appendChild(row));
+                }
+            }
+
+            if(oduncSearchInput) oduncSearchInput.addEventListener('input', applyOduncFilters);
+            if(oduncSortSelect) oduncSortSelect.addEventListener('change', applyOduncFilters);
+            statusFilters.forEach(cb => cb.addEventListener('change', applyOduncFilters));
+
+            function updateInfoCards() {
+                if(!userOduncBody) return;
+                const rows = Array.from(userOduncBody.querySelectorAll('.odunc-row'));
+                let devam = 0;
+                let geciken = 0;
+                rows.forEach(row => {
+                    const statusText = row.querySelector('.status-badge').textContent.trim();
+                    if(statusText === 'Devam Edenler') devam++;
+                    else if(statusText === 'Gecikenler') geciken++;
+                });
+                const elDevam = document.getElementById('infoDevamEden');
+                const elGeciken = document.getElementById('infoGeciken');
+                if(elDevam) elDevam.textContent = devam;
+                if(elGeciken) elGeciken.textContent = geciken;
+            }
+            updateInfoCards();
+
+
+            // Checkbox Logic for Penalties
+            const selectAllPenalties = document.getElementById('selectAllPenalties');
+            const penaltyCheckboxes = document.querySelectorAll('.penalty-checkbox');
+            const btnPayPenalty = document.getElementById('btnPayPenalty');
+            const penaltyRows = document.querySelectorAll('#penaltiesBody tr.selectable-row');
+
+            function updatePayButtonState() {
+                const anyChecked = Array.from(penaltyCheckboxes).some(cb => cb.checked);
+                btnPayPenalty.disabled = !anyChecked;
+                
+                if (penaltyCheckboxes.length > 0) {
+                    const allChecked = Array.from(penaltyCheckboxes).every(cb => cb.checked);
+                    const someChecked = Array.from(penaltyCheckboxes).some(cb => cb.checked);
+                    selectAllPenalties.checked = allChecked;
+                    selectAllPenalties.indeterminate = someChecked && !allChecked;
+                }
+            }
+
+            if (selectAllPenalties) {
+                selectAllPenalties.addEventListener('change', function() {
+                    penaltyCheckboxes.forEach(cb => {
+                        cb.checked = this.checked;
+                        const row = cb.closest('tr');
+                        if (this.checked) {
+                            row.classList.add('selected-row');
+                        } else {
+                            row.classList.remove('selected-row');
+                        }
+                    });
+                    updatePayButtonState();
+                });
+            }
+
+            penaltyCheckboxes.forEach(cb => {
+                cb.addEventListener('change', function(e) {
+                    e.stopPropagation();
+                    const row = this.closest('tr');
+                    if (this.checked) {
+                        row.classList.add('selected-row');
+                    } else {
+                        row.classList.remove('selected-row');
+                    }
+                    updatePayButtonState();
+                });
+            });
+
+            penaltyRows.forEach(row => {
+                row.addEventListener('click', function(e) {
+                    if (e.target.tagName === 'BUTTON' || e.target.tagName === 'INPUT' || e.target.closest('.btn')) {
+                        return;
+                    }
+                    
+                    const checkbox = this.querySelector('.penalty-checkbox');
+                    if (checkbox) {
+                        checkbox.checked = !checkbox.checked;
+                        if (checkbox.checked) {
+                            this.classList.add('selected-row');
+                        } else {
+                            this.classList.remove('selected-row');
+                        }
+                        updatePayButtonState();
+                    }
+                });
+            });
+
+            // Pay Penalty Button Click (Modal Open)
+            const btnCloseModal = document.getElementById('btnCloseModal');
+            const paymentOverlay = document.getElementById('paymentOverlay');
+            const modalTotalAmount = document.getElementById('modalTotalAmount');
+
+            if (btnPayPenalty) {
+                btnPayPenalty.addEventListener('click', function() {
+                    // Seçilenlerin toplam tutarını hesapla
+                    let total = 0;
+                    const selectedCheckboxes = Array.from(penaltyCheckboxes).filter(cb => cb.checked);
+                    
+                    selectedCheckboxes.forEach(cb => {
+                        const row = cb.closest('tr');
+                        const amountText = row.querySelector('.amount').textContent;
+                        const amount = parseFloat(amountText.replace(/[^\d.]/g, ''));
+                        total += amount;
+                    });
+                    
+                    modalTotalAmount.textContent = total.toFixed(2) + ' ₺';
+                    paymentOverlay.classList.add('active');
+                });
+            }
+
+            if (btnCloseModal) {
+                btnCloseModal.addEventListener('click', function() {
+                    paymentOverlay.classList.remove('active');
+                });
+            }
+
+            // Virtual Card Input Bindings and Visual Formatting
+            const cardholderNameInput = document.getElementById('cardholderName');
+            const cardNumberInput = document.getElementById('cardNumber');
+            const cardExpiryInput = document.getElementById('cardExpiry');
+            const cardCvvInput = document.getElementById('cardCvv');
+            
+            const vCard = document.getElementById('vCard');
+            const vCardName = document.getElementById('vCardName');
+            const vCardNumber = document.getElementById('vCardNumber');
+            const vCardExpiry = document.getElementById('vCardExpiry');
+            const vCardCvv = document.getElementById('vCardCvv');
+
+            cardholderNameInput.addEventListener('input', function() {
+                vCardName.textContent = this.value.toUpperCase() || 'AD SOYAD';
+            });
+
+            cardNumberInput.addEventListener('input', function() {
+                let val = this.value.replace(/\D/g, '');
+                let formatted = '';
+                for(let i = 0; i < val.length; i++) {
+                    if(i > 0 && i % 4 === 0) formatted += ' ';
+                    formatted += val[i];
+                }
+                this.value = formatted;
+                vCardNumber.textContent = formatted || '•••• •••• •••• ••••';
+            });
+
+            cardExpiryInput.addEventListener('input', function() {
+                let val = this.value.replace(/\D/g, '');
+                if(val.length > 2) {
+                    val = val.substring(0, 2) + '/' + val.substring(2, 4);
+                }
+                this.value = val;
+                vCardExpiry.textContent = val || 'AA/YY';
+            });
+
+            cardCvvInput.addEventListener('focus', function() {
+                vCard.classList.add('flipped');
+            });
+
+            cardCvvInput.addEventListener('blur', function() {
+                vCard.classList.remove('flipped');
+            });
+
+            cardCvvInput.addEventListener('input', function() {
+                let val = this.value.replace(/\D/g, '');
+                this.value = val;
+                vCardCvv.textContent = val || '•••';
+            });
+
+            // Simulated Payment Processing
+            const paymentForm = document.getElementById('paymentForm');
+            const paymentLoader = document.getElementById('paymentLoader');
+            const paymentSpinner = document.getElementById('paymentSpinner');
+            const paymentSuccessIcon = document.getElementById('paymentSuccessIcon');
+            const paymentStatusText = document.getElementById('paymentStatusText');
+            const paymentSubtext = document.getElementById('paymentSubtext');
+            const gecmisBody = document.getElementById('gecmisBody');
+            const penaltiesBody = document.getElementById('penaltiesBody');
+
+            paymentForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+
+                // Show processing spinner
+                paymentLoader.classList.add('active');
+                paymentSpinner.style.display = 'block';
+                paymentSuccessIcon.style.display = 'none';
+                paymentStatusText.textContent = 'Ödemeniz İşleniyor...';
+                paymentSubtext.textContent = 'Lütfen bu pencereyi kapatmayın veya sayfayı yenilemeyin.';
+
+                // Simulate payment after 2 seconds
+                setTimeout(() => {
+                    paymentSpinner.style.display = 'none';
+                    paymentSuccessIcon.style.display = 'flex';
+                    paymentStatusText.textContent = 'Ödeme Başarılı!';
+                    paymentSubtext.textContent = 'Cezanız tahsil edildi. İşlemleriniz geçmişe aktarıldı.';
+
+                    // Move items from unpaid to paid
+                    setTimeout(() => {
+                        const selectedCheckboxes = Array.from(penaltyCheckboxes).filter(cb => cb.checked);
+                        
+                        selectedCheckboxes.forEach(cb => {
+                            const row = cb.closest('tr');
+                            const bookName = row.cells[2].textContent;
+                            const amount = row.querySelector('.amount').textContent;
+                            const today = new Date().toLocaleDateString('tr-TR');
+
+                            const newRow = document.createElement('tr');
+                            newRow.className = 'odunc-row';
+                            newRow.innerHTML = `
+                                <td><span style="font-weight: 500;">${bookName}</span></td>
+                                <td>Gecikme Cezası Ödendi</td>
+                                <td>-</td>
+                                <td>${today}</td>
+                                <td>-</td>
+                                <td><span class="status-badge status-returned" style="background-color: #def7ec; color: #03543f;">İade Edildi</span></td>
+                            `;
+                            
+                            // Eklenen yeni satırı üst kısma koyuyoruz, fitreleri de tekrar uyguluyoruz
+                            userOduncBody.insertBefore(newRow, userOduncBody.firstChild);
+                            applyOduncFilters();
+                            updateInfoCards();
+                            
+                            row.remove();
+                        });
+
+                        paymentForm.reset();
+                        vCardName.textContent = 'AD SOYAD';
+                        vCardNumber.textContent = '•••• •••• •••• ••••';
+                        vCardExpiry.textContent = 'AA/YY';
+                        vCardCvv.textContent = '•••';
+                        
+                        paymentOverlay.classList.remove('active');
+                        paymentLoader.classList.remove('active');
+                        
+                        selectAllPenalties.checked = false;
+                        selectAllPenalties.indeterminate = false;
+                        btnPayPenalty.disabled = true;
+
+                        const remainingRows = penaltiesBody.querySelectorAll('tr');
+                        if (remainingRows.length === 0) {
+                            penaltiesBody.innerHTML = `
+                                <tr>
+                                    <td colspan="7" class="text-center text-muted py-4">
+                                        <i class="fa-solid fa-circle-check text-success fs-3 mb-2 d-block"></i>
+                                        Ödenmemiş cezanız bulunmamaktadır.
+                                    </td>
+                                </tr>
+                            `;
+                        }
+
+                    }, 1500);
+
+                }, 2000);
+            });
+        });
+    </script>
+
+    <!-- Online Ödeme Modal Overlay -->
+    <div class="modal-overlay" id="paymentOverlay">
+        <div class="payment-modal position-relative">
+            <!-- Simulated Loading Screen -->
+            <div class="payment-loader" id="paymentLoader">
+                <div class="spinner" id="paymentSpinner"></div>
+                <div class="success-checkmark" id="paymentSuccessIcon" style="display: none;">
+                    <i class="fa-solid fa-check text-success" style="font-size: 2.5rem;"></i>
+                </div>
+                <h5 class="fw-bold mt-2" id="paymentStatusText">Ödemeniz İşleniyor...</h5>
+                <p class="text-muted small px-4 text-center" id="paymentSubtext">Lütfen bu pencereyi kapatmayın veya sayfayı yenilemeyin.</p>
+            </div>
+
+            <!-- Modal Header -->
+            <div class="modal-header">
+                <h5 class="modal-title">Online Ceza Ödemesi</h5>
+                <button class="close-modal" id="btnCloseModal">&times;</button>
+            </div>
+            
+            <!-- Modal Body -->
+            <div class="modal-body">
+                <!-- Virtual Credit Card Design -->
+                <div class="card-container">
+                    <div class="virtual-card" id="vCard">
+                        <!-- Card Front -->
+                        <div class="card-front">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div class="card-chip"></div>
+                                <i class="fa-solid fa-credit-card fa-2xl"></i>
+                            </div>
+                            <div class="card-number" id="vCardNumber">•••• •••• •••• ••••</div>
+                            <div class="card-info-row">
+                                <div>
+                                    <div class="card-label">KART SAHİBİ</div>
+                                    <div class="card-value" id="vCardName">AD SOYAD</div>
+                                </div>
+                                <div class="text-end">
+                                    <div class="card-label">AY / YIL</div>
+                                    <div class="card-value" id="vCardExpiry">AA/YY</div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Card Back -->
+                        <div class="card-back">
+                            <div class="card-black-bar"></div>
+                            <div class="card-signature-bar" id="vCardCvv">•••</div>
+                            <div class="px-3 py-2 text-end text-white-50" style="font-size: 0.6rem; letter-spacing: 1px;">
+                                SECURITY CODE
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Payment Form -->
+                <form id="paymentForm" onsubmit="return false;">
+                    <div class="form-group">
+                        <label for="cardholderName">KART SAHİBİ ADI SOYADI</label>
+                        <input type="text" id="cardholderName" class="form-input" required placeholder="Kart üzerindeki isim" maxlength="26" autocomplete="off">
+                    </div>
+                    <div class="form-group">
+                        <label for="cardNumber">KART NUMARASI</label>
+                        <input type="text" id="cardNumber" class="form-input" required placeholder="0000 0000 0000 0000" maxlength="19" autocomplete="off">
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="cardExpiry">SON KULLANMA TARİHİ</label>
+                            <input type="text" id="cardExpiry" class="form-input" required placeholder="AA/YY" maxlength="5" autocomplete="off">
+                        </div>
+                        <div class="form-group">
+                            <label for="cardCvv">CVV / GÜVENLİK KODU</label>
+                            <input type="text" id="cardCvv" class="form-input" required placeholder="000" maxlength="3" autocomplete="off">
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between align-items-center bg-light p-3 rounded-3 mb-3 border">
+                        <span class="fw-bold text-secondary small">ÖDENECEK TOPLAM:</span>
+                        <span class="fs-4 fw-bold text-danger" id="modalTotalAmount">0.00 ₺</span>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100 py-3" style="font-size: 1rem; border-radius: 12px;" id="btnSubmitPayment">
+                        Ödemeyi Tamamla
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

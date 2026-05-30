@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Ödünç İşlemleri - Personel</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.bootstrap5.min.css" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        .toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+        }
+        .table-container {
+            overflow-x: auto;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            margin: 1.5rem;
+        }
+        .ceza-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            text-align: left;
+        }
+        .ceza-table th {
+            background-color: rgba(255, 255, 255, 0.5);
+            padding: 1.25rem 1rem;
+            font-weight: 600;
+            font-size: 0.875rem;
+            color: #475569;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+        }
+        .ceza-table td {
+            padding: 1.25rem 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+            font-size: 0.95rem;
+            vertical-align: middle;
+        }
+        .ceza-table tr:last-child td { border-bottom: none; }
+        .ceza-table tr { transition: background-color 0.2s ease; cursor: pointer; }
+        .ceza-table tr:hover { background-color: rgba(255, 255, 255, 0.7); }        body { 
+            font-family: 'Inter', sans-serif; 
+            background: radial-gradient(circle at top left, #e0e7ff, transparent 50%),
+                        radial-gradient(circle at top right, #fbcfe8, transparent 50%),
+                        radial-gradient(circle at bottom left, #cffafe, transparent 50%),
+                        radial-gradient(circle at bottom right, #ede9fe, transparent 50%);
+            background-color: #f8fafc;
+            background-attachment: fixed;
+            color: #1e293b; 
+            margin: 0; 
+            padding: 0; 
+            min-height: 100vh;
+        }
+        
+        .card-stats { 
+            background: rgba(255, 255, 255, 0.6) !important;
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.9) !important; 
+            border-radius: 24px !important;
+            transition: all 0.3s ease; 
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.05) !important;
+            cursor: pointer;
+        }
+        .card-stats:hover { transform: translateY(-5px); box-shadow: 0 15px 35px rgba(0,0,0,0.1) !important; }
+        
+        .modern-card { 
+            border-radius: 24px; 
+            overflow: hidden; 
+            border: 1px solid rgba(255, 255, 255, 0.8); 
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.05); 
+            background: rgba(255, 255, 255, 0.6); 
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+        }
+        
+        .modern-card .card-header {
+            background: rgba(255, 255, 255, 0.4) !important;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.5) !important;
+        }
+        
+        .modern-card .card-body {
+            background: transparent !important;
+        }
+        
+        .table {
+            background: transparent !important;
+        }
+        
+        .table thead th {
+            background: rgba(255, 255, 255, 0.5) !important;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.8) !important;
+            color: #475569;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            letter-spacing: 0.05em;
+        }
+        
+        .table tbody tr {
+            background: transparent !important;
+            transition: all 0.2s;
+        }
+        
+        .table tbody tr:hover {
+            background: rgba(255, 255, 255, 0.8) !important;
+        }
+        
+        .table tbody td {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+            vertical-align: middle;
+        }
+        
+        .form-control, .form-select { 
+            border-radius: 12px; 
+            border: 1px solid rgba(255, 255, 255, 0.8); 
+            background: rgba(255, 255, 255, 0.7);
+            font-size: 14px; 
+            padding: 10px 15px;
+        }
+        .form-control:focus, .form-select:focus { 
+            border-color: #4f46e5; 
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1); 
+            background: #fff;
+        }
+        
+        /* Buttons glassmorphism */
+        .btn-outline-secondary, .btn-outline-primary {
+            background: rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+        }
+        .btn-outline-secondary:hover { background: #fff; color: #1e293b; }
+        
+        /* Tom Select custom overrides for glassmorphism UI */
+        .ts-wrapper.form-select { padding: 0 !important; border: none !important; background: transparent !important; }
+        .ts-wrapper .ts-control {
+            border-radius: 12px !important;
+            border: 1px solid rgba(255, 255, 255, 0.8) !important;
+            background: rgba(255, 255, 255, 0.7) !important;
+            font-size: 14px !important;
+            font-family: 'Inter', sans-serif !important;
+            min-height: 43px;
+            padding: 8px 40px 8px 14px !important;
+            box-shadow: none !important;
+            cursor: pointer;
+        }
+        .ts-wrapper.focus .ts-control {
+            border-color: #4f46e5 !important;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1) !important;
+            background: #fff !important;
+        }
+        .ts-dropdown {
+            border-radius: 12px !important;
+            border: 1px solid rgba(200,210,230,0.8) !important;
+            background: rgba(255,255,255,0.97) !important;
+            backdrop-filter: blur(12px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+            font-size: 14px !important;
+            font-family: 'Inter', sans-serif !important;
+            overflow: hidden;
+        }
+        .ts-dropdown .option { padding: 9px 14px; transition: background 0.15s; }
+        .ts-dropdown .option:hover, .ts-dropdown .option.active { background: #eff6ff !important; color: #2563eb !important; }
+        .ts-dropdown .option.selected { background: #dbeafe !important; color: #1d4ed8 !important; font-weight: 600; }
+        .ts-control input { font-family: 'Inter', sans-serif !important; font-size: 14px !important; }
+        .bg-active-yellow { background-color: #eab308 !important; color: white !important; }
+    </style>
+</head>
+<body>
+
+<div th:replace="~{staff/sidebar :: sidebar}" id="sidebar" class="sidebar">
+    <!-- Statik önizleme için (Thymeleaf çalıştırılmadığında tarayıcının göreceği kod) -->
+    <div class="sidebar-header">
+        <h5 class="sidebar-title m-0">Library Staff</h5>
+        <button class="toggle-btn" id="sidebarToggle"><i class="fa-solid fa-bars"></i></button>
+    </div>
+    <ul class="nav flex-column mt-3">
+        <li class="nav-item"><a th:href="@{/staff/dashboard}" href="dashboard.html" class="nav-link"><i class="fa-solid fa-chart-pie"></i><span class="sidebar-text">Dashboard</span></a></li>
+        <li class="nav-item"><a href="#" class="nav-link"><i class="fa-solid fa-book"></i><span class="sidebar-text">Kitap Listeleri</span></a></li>
+        <li class="nav-item"><a href="#" class="nav-link"><i class="fa-solid fa-users"></i><span class="sidebar-text">Kullanıcılar</span></a></li>
+        <li class="nav-item"><a th:href="@{/odunc-islemleri/staff}" href="odunc.html" class="nav-link"><i class="fa-solid fa-hand-holding-hand"></i><span class="sidebar-text">Ödünç İşlemleri</span></a></li>
+        <li class="nav-item"><a th:href="@{/cezalar/staff}" href="ceza.html" class="nav-link"><i class="fa-solid fa-money-bill-wave"></i><span class="sidebar-text">Cezalar</span></a></li>
+        <li class="nav-item"><a href="#" class="nav-link"><i class="fa-solid fa-calendar-check"></i><span class="sidebar-text">Rezervasyonlar</span></a></li>
+    </ul>
+    <style>
+        .sidebar { width: 260px; background: #1e293b; color: #fff; min-height: 100vh; position: fixed; top: 0; left: 0; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); z-index: 1000; overflow-y: auto; box-shadow: 4px 0 10px rgba(0,0,0,0.1); }
+        .sidebar.collapsed { width: 76px; }
+        .sidebar-header { display: flex; justify-content: space-between; align-items: center; padding: 24px 20px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .sidebar.collapsed .sidebar-title { display: none; }
+        .sidebar .nav { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; }
+        .sidebar .nav-item { margin-bottom: 4px; }
+        .sidebar .nav-link { color: #cbd5e1; padding: 14px 24px; transition: 0.2s; white-space: nowrap; overflow: hidden; display: flex; align-items: center; text-decoration: none; font-size: 15px; font-weight: 500; }
+        .sidebar .nav-link:hover { color: #fff; background: rgba(255,255,255,0.1); border-left: 4px solid #3b82f6; padding-left: 20px; }
+        .sidebar .nav-link i { min-width: 32px; font-size: 1.25rem; text-align: center; margin-right: 12px; }
+        .sidebar.collapsed .nav-link i { margin-right: 0; }
+        .sidebar .sidebar-text { transition: opacity 0.3s; }
+        .sidebar.collapsed .sidebar-text { opacity: 0; display: none; }
+        .toggle-btn { background: transparent; color: #cbd5e1; border: none; font-size: 1.25rem; cursor: pointer; padding: 4px; border-radius: 4px; transition: 0.2s; }
+        .toggle-btn:hover { color: #fff; background: rgba(255,255,255,0.1); }
+        .content-area { margin-left: 260px; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); min-height: 100vh; }
+        .content-area.collapsed { margin-left: 76px; }
+    </style>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const sidebar = document.getElementById('sidebar');
+            const contentArea = document.querySelector('.content-area');
+            const toggleBtn = document.getElementById('sidebarToggle');
+            
+            // Check localStorage for sidebar state
+            if(localStorage.getItem('sidebarCollapsed') === 'true') {
+                if(sidebar) sidebar.classList.add('collapsed');
+                if(contentArea) contentArea.classList.add('collapsed');
+            }
+
+            if(toggleBtn) {
+                toggleBtn.addEventListener('click', function() {
+                    if(sidebar) sidebar.classList.toggle('collapsed');
+                    if(contentArea) contentArea.classList.toggle('collapsed');
+                    if(sidebar) localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'));
+                });
+            }
+        });
+    </script>
+</div>
+
+<div class="content-area">
+    <div class="row mb-4 g-4">
+        <div class="col-md-4">
+            <div class="card card-stats p-2" onclick="filterTable('all')" style="border-bottom: 5px solid #3b82f6 !important;">
+                <div class="card-body d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-muted fw-bold small m-0 mb-1">TOPLAM ÖDÜNÇ İŞLEMİ</h6>
+                        <h3 class="fw-bold text-primary m-0" th:text="${#lists.size(oduncler) ?: 0}">68</h3>
+                    </div>
+                    <div class="bg-primary bg-opacity-10 text-primary" style="width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; border-radius: 10px; font-size: 1.5rem;">
+                        <i class="fa-solid fa-book"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card card-stats p-2" onclick="filterTable('active')" style="border-bottom: 5px solid #eab308 !important;">
+                <div class="card-body d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-muted fw-bold small m-0 mb-1">AKTİF ÖDÜNÇ</h6>
+                        <h3 class="fw-bold m-0" style="color: #eab308;" th:text="${activeBorrowings ?: 5}">5</h3>
+                    </div>
+                    <div style="background-color: #fef3c7; color: #eab308; width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; border-radius: 10px; font-size: 1.5rem;">
+                        <i class="fa-solid fa-hand-holding-hand"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card card-stats p-2" onclick="filterTable('overdue')" style="border-bottom: 5px solid #ef4444 !important;">
+                <div class="card-body d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-muted fw-bold small m-0 mb-1">GECİKMİŞ İADELER</h6>
+                        <h3 class="fw-bold text-danger m-0" th:text="${overdueCount ?: 5}">5</h3>
+                    </div>
+                    <div class="bg-danger bg-opacity-10 text-danger" style="width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; border-radius: 10px; font-size: 1.5rem;">
+                        <i class="fa-solid fa-clock"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Ödünç Listesi Tablosu (Başlangıçta tüm liste görünür, kartlara tıklanınca filtrelenir) -->
+    <div class="row mb-4" id="oduncListRow">
+        <div class="col-md-12">
+            <div class="card modern-card">
+                <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center" id="listHeader">
+                    <h5 id="listTitle" class="m-0 fw-bold text-dark">Ödünç Listesi</h5>
+                    <button id="toggleListBtn" class="btn btn-sm btn-outline-secondary" onclick="toggleTable()" style="border-radius: 8px;">Gizle</button>
+                </div>
+                <div id="oduncListContent">
+                    <div class="toolbar" style="gap: 1rem; flex-wrap: wrap;">
+                        <input type="text" id="tableSearchInput" class="form-control" placeholder="Kullanıcı, Kitap veya Barkod ara..." style="max-width: 350px; padding: 0.5rem; border-radius: 6px; border: 1px solid #ccc; flex: 1;">
+                        <select id="tableSortSelect" class="form-select" style="max-width: 300px; padding: 0.5rem; border-radius: 6px; border: 1px solid #ccc;">
+                            <option value="default">Sıralama Seçiniz (Varsayılan)</option>
+                            <option value="az_kullanici">Kullanıcı (A-Z)</option>
+                            <option value="za_kullanici">Kullanıcı (Z-A)</option>
+                            <option value="az_kitap">Kitap (A-Z)</option>
+                            <option value="za_kitap">Kitap (Z-A)</option>
+                            <option value="tarih_eski">Teslim Tarihi (Önce En Yakın)</option>
+                            <option value="tarih_yeni">Teslim Tarihi (Önce En Uzak)</option>
+                            <option value="stok_az">Kalan Stok (En Az)</option>
+                            <option value="stok_cok">Kalan Stok (En Çok)</option>
+                            <option value="gecikme_cok">Gecikme Süresi / Cezası (En Çok)</option>
+                            <option value="gecikme_az">Gecikme Süresi / Cezası (En Az)</option>
+                        </select>
+                    </div>
+                
+                    <div class="table-container">
+                        <table class="ceza-table" id="oduncTable">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Kullanıcı / Üye</th>
+                                    <th>Kitap</th>
+                                    <th>Kalan Stok</th>
+                                    <th>Geri Teslim Tarihi</th>
+                                    <th>Gecikme Cezası</th>
+                                    <th>Durum</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Thymeleaf ile oduncler listesini dönüyoruz -->
+                                <tr th:each="odunc, iterStat : ${oduncler}" class="odunc-row" th:data-original-index="${iterStat.index}" th:data-status="${odunc.getDurum() != null ? (odunc.getDurum().toString() == 'GECIKMIS' || odunc.getDurum().toString() == 'GECİKMİŞ' ? 'overdue' : (odunc.getDurum().toString() == 'TAMAMLANDI' || odunc.getDurum().toString() == 'TESLIM_EDILDI' ? 'completed' : 'active')) : 'active'}">
+                                    <td th:text="${odunc.id}">1</td>
+                                    <td th:text="${odunc.kullaniciAdi != null ? odunc.kullaniciAdi : odunc.kullaniciId}">Üye Adı</td>
+                                    <td th:text="${odunc.kitapBaslik != null ? odunc.kitapBaslik : odunc.kopyaId}">Kitap Adı</td>
+                                    <td th:text="${odunc.kitapStok != null ? odunc.kitapStok : '-'}">Stok</td>
+                                    <td th:text="${odunc.teslimTarihi != null ? #temporals.format(odunc.teslimTarihi, 'dd/MM/yyyy') : '-'}">15/05/2026</td>
+                                    <td th:text="${odunc.cezaTutari() > 0 ? odunc.cezaTutari() + ' TL' : '-'}">-</td>
+                                    <td>
+                                        <span class="badge" th:classappend="${odunc.getDurum() != null && (odunc.getDurum().toString() == 'GECIKMIS' || odunc.getDurum().toString() == 'GECİKMİŞ') ? 'bg-danger' : (odunc.getDurum() != null && (odunc.getDurum().toString() == 'TAMAMLANDI' || odunc.getDurum().toString() == 'TESLIM_EDILDI') ? 'bg-success' : 'bg-active-yellow')}" th:text="${(odunc.getDurum() == null || odunc.getDurum() == 'DEVAM_EDIYOR' || odunc.getDurum() == 'Aktif') ? 'Devam Ediyor' : (odunc.getDurum() == 'GECIKMIS' || odunc.getDurum() == 'GECİKMİŞ' ? 'Gecikmiş' : (odunc.getDurum() == 'TESLIM_EDILDI' || odunc.getDurum() == 'TAMAMLANDI' ? 'Teslim Edildi' : odunc.getDurum()))}">Devam Ediyor</span>
+                                    </td>
+                                </tr>
+                                <!-- Veri yoksa örnek gösterim için (Eğer oduncler boşsa ve test etmek isterseniz HTML olarak kalabilir, thymeleaf sadece veritabanında varsa renderlar) -->
+                                <tr th:if="${#lists.isEmpty(oduncler)}" class="odunc-row" data-original-index="998" data-status="overdue">
+                                    <td>Örnek-1</td>
+                                    <td>Ahmet Yılmaz</td>
+                                    <td>Suç ve Ceza</td>
+                                    <td>15</td>
+                                    <td>01/01/2024</td>
+                                    <td>150.0 TL</td>
+                                    <td><span class="badge bg-danger">Gecikmiş</span></td>
+                                </tr>
+                                <tr th:if="${#lists.isEmpty(oduncler)}" class="odunc-row" data-original-index="999" data-status="active">
+                                    <td>Örnek-2</td>
+                                    <td>Ayşe Demir</td>
+                                    <td>Sefiller</td>
+                                    <td>8</td>
+                                    <td>31/12/2026</td>
+                                    <td>-</td>
+                                    <td><span class="badge bg-active-yellow">Devam Ediyor</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div> <!-- End of oduncListContent -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Ödünç Ver / İade Al Formları -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-6">
+            <div class="card modern-card h-100">
+                <div class="card-header bg-white border-bottom py-3">
+                    <h5 class="m-0 fw-bold text-dark">Ödünç Ver</h5>
+                </div>
+                <div class="card-body p-4">
+                    <form th:action="@{/odunc-islemleri/save}" method="post">
+                        <div class="mb-3">
+                            <label class="form-label">Kitap Seç (ID veya İsim)</label>
+                            <select class="form-select searchable-select" name="kopyaId" data-placeholder="Kitap Seçiniz">
+                                <option value=""></option>
+                                <option th:each="kitap : ${kitaplar}" th:value="${kitap.id}" th:text="${kitap.id + ' - ' + kitap.baslik + ' (Stok: ' + kitap.stok + ')'}"></option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Üye Seç (ID veya İsim)</label>
+                            <select class="form-select searchable-select" name="kullaniciId" data-placeholder="Kullanıcı Seçiniz">
+                                <option value=""></option>
+                                <option th:each="user : ${kullanicilar}" th:value="${user.id}" th:text="${user.id + ' - ' + user.ad + ' ' + user.soyad}"></option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Geri Teslim Tarihi</label>
+                            <input type="date" class="form-control" name="teslimTarihi">
+                        </div>
+                        <button type="submit" class="btn btn-success w-100 mt-2" style="border-radius: 8px; font-weight: 600;">
+                            <i class="fa-solid fa-check me-2"></i>Ödüncü Onayla
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card modern-card h-100">
+                <div class="card-header bg-white border-bottom py-3">
+                    <h5 class="m-0 fw-bold text-dark">İade Al</h5>
+                </div>
+                <div class="card-body p-4">
+                    <form th:action="@{/odunc-islemleri/teslim-al}" method="post">
+                        <div class="mb-3">
+                            <label class="form-label">İade Edilecek İşlemi Seçin</label>
+                            <select class="form-select searchable-select" name="oduncId" data-placeholder="Üye veya Kitap Ara" required>
+                                <option value=""></option>
+                                <option th:each="o : ${oduncler}" th:if="${o.durum != 'TESLIM_EDILDI' && o.durum != 'TAMAMLANDI'}" th:value="${o.id}" th:text="${'ID: ' + o.id + ' | ' + (o.kullaniciAdi != null ? o.kullaniciAdi : 'Üye ' + o.kullaniciId) + ' - ' + (o.kitapBaslik != null ? o.kitapBaslik : 'Kitap ' + o.kopyaId)}"></option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Açıklama</label>
+                            <textarea class="form-control" name="aciklama" rows="1" placeholder="Varsa notunuzu yazın"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Kitap Durumu</label>
+                            <select class="form-select" name="kitapDurumu">
+                                <option value="Iyi">İyi</option>
+                                <option value="Hasarli">Hasarlı</option>
+                                <option value="Eksik_Sayfa">Eksik Sayfa</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100 mt-2" style="border-radius: 8px; font-weight: 600;">
+                            <i class="fa-solid fa-box-archive me-2"></i>İade Al ve Bitir
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function() {
+        const tsConfig = {
+            allowEmptyOption: true,
+            placeholder: 'Seçim yapınız...',
+            searchField: 'text',
+            maxOptions: 500,
+            plugins: ['clear_button'],
+            render: {
+                no_results: function() {
+                    return '<div class="no-results">Sonuç bulunamadı</div>';
+                }
+            }
+        };
+
+        document.querySelectorAll('.searchable-select').forEach(function(el) {
+            if (!el.tomselect) {
+                new TomSelect(el, Object.assign({}, tsConfig));
+            }
+        });
+        
+        // Sayfa açıldığında varsayılan olarak tüm listeyi göster (aşağı kaydırma yapmadan)
+        filterTable('all', false);
+    });
+
+    let currentStatusFilter = 'all';
+    let itemsPerPage = 30;
+    let currentlyShown = itemsPerPage;
+
+    function filterTable(status, shouldScroll = true) {
+        currentStatusFilter = status;
+        currentlyShown = itemsPerPage; // Reset pagination
+        
+        // Tablo gizliyse (sadece içeriği) görünür yapıyoruz
+        if (!$('#oduncListContent').is(':visible')) {
+            $('#oduncListContent').slideDown(300);
+            $('#toggleListBtn').text('Gizle').removeClass('btn-outline-primary').addClass('btn-outline-secondary');
+        }
+        
+        // Başlığı ve Header rengini güncelliyoruz
+        let title = "Tüm Ödünç İşlemleri";
+        let headerColorClass = "text-dark";
+        
+        if (status === 'active') {
+            title = "Aktif Ödünç Verilenler Listesi";
+            headerColorClass = "text-success";
+        } else if (status === 'overdue') {
+            title = "Gecikmiş İadeler Listesi";
+            headerColorClass = "text-danger";
+        }
+        
+        $('#listTitle').text(title).removeClass('text-dark text-success text-danger').addClass(headerColorClass);
+
+        // Arama, Durum ve Sıralamayı uygula
+        applyFilters();
+
+        // Yumuşak kaydırma ile tabloya odaklanıyoruz (Sadece kartlara tıklandığında çalışır)
+        if (shouldScroll) {
+            $('html, body').animate({
+                scrollTop: $("#oduncListRow").offset().top - 50
+            }, 500);
+        }
+    }
+
+    function toggleTable() {
+        const content = $('#oduncListContent');
+        const btn = $('#toggleListBtn');
+        if (content.is(':visible')) {
+            content.slideUp(300);
+            btn.text('Görüntüle').removeClass('btn-outline-secondary').addClass('btn-outline-primary');
+        } else {
+            content.slideDown(300);
+            btn.text('Gizle').removeClass('btn-outline-primary').addClass('btn-outline-secondary');
+        }
+    }
+
+    // Arama ve Sıralama Olaylarını Dinleme
+    $('#tableSearchInput').on('input', function() {
+        currentlyShown = itemsPerPage;
+        applyFilters();
+    });
+
+    $('#tableSortSelect').on('change', function() {
+        currentlyShown = itemsPerPage;
+        applyFilters();
+    });
+
+    function applyFilters() {
+        let searchTerm = $('#tableSearchInput').val().toLowerCase();
+        let sortMode = $('#tableSortSelect').val();
+        
+        let $rows = $('.odunc-row');
+        let visibleRows = [];
+        
+        // 1. Filtreleme (Kart durumu ve Arama Kutusu)
+        $rows.each(function() {
+            let statusMatch = (currentStatusFilter === 'all' || $(this).data('status') === currentStatusFilter);
+            let textMatch = $(this).text().toLowerCase().indexOf(searchTerm) > -1;
+            
+            if (statusMatch && textMatch) {
+                visibleRows.push(this);
+            } else {
+                $(this).hide();
+            }
+        });
+
+        // "Gecikme Cezası" Sütununu Gizle/Göster
+        if (currentStatusFilter === 'active') {
+            $('#oduncTable th:eq(5), .odunc-row td:nth-child(6)').hide();
+        } else {
+            $('#oduncTable th:eq(5), .odunc-row td:nth-child(6)').show();
+        }
+
+        // 2. Sıralama İşlemi
+        if (sortMode !== 'default') {
+            let rowArray = visibleRows;
+            rowArray.sort(function(a, b) {
+                let valA = '', valB = '';
+                
+                if (sortMode.includes('kullanici')) {
+                    valA = $(a).find('td').eq(1).text().trim().toLowerCase();
+                    valB = $(b).find('td').eq(1).text().trim().toLowerCase();
+                } else if (sortMode.includes('kitap')) {
+                    valA = $(a).find('td').eq(2).text().trim().toLowerCase();
+                    valB = $(b).find('td').eq(2).text().trim().toLowerCase();
+                } else if (sortMode.includes('tarih')) {
+                    valA = new Date($(a).find('td').eq(4).text().trim()).getTime() || 0;
+                    valB = new Date($(b).find('td').eq(4).text().trim()).getTime() || 0;
+                } else if (sortMode.includes('stok')) {
+                    valA = parseInt($(a).find('td').eq(3).text().trim()) || 0;
+                    valB = parseInt($(b).find('td').eq(3).text().trim()) || 0;
+                    if (valA < valB) return sortMode === 'stok_az' ? -1 : 1;
+                    if (valA > valB) return sortMode === 'stok_az' ? 1 : -1;
+                    return 0;
+                } else if (sortMode.includes('gecikme')) {
+                    let valA_str = $(a).find('td').eq(5).text().trim();
+                    let valB_str = $(b).find('td').eq(5).text().trim();
+                    valA = valA_str === '-' ? 0 : parseFloat(valA_str.replace(/[^\d.-]/g, '')) || 0;
+                    valB = valB_str === '-' ? 0 : parseFloat(valB_str.replace(/[^\d.-]/g, '')) || 0;
+                    if (valA < valB) return sortMode === 'gecikme_az' ? -1 : 1;
+                    if (valA > valB) return sortMode === 'gecikme_az' ? 1 : -1;
+                    return 0;
+                }
+                
+                if (valA < valB) return sortMode.startsWith('az') || sortMode.endsWith('eski') ? -1 : 1;
+                if (valA > valB) return sortMode.startsWith('az') || sortMode.endsWith('eski') ? 1 : -1;
+                return 0;
+            });
+            
+            let tbody = $('#oduncTable tbody');
+            $.each(rowArray, function(index, row) {
+                if (index < currentlyShown) $(row).show(); else $(row).hide();
+                tbody.append(row); 
+            });
+        } else {
+            let rowArray = visibleRows;
+            rowArray.sort(function(a, b) {
+                let valA = parseInt($(a).data('original-index')) || 0;
+                let valB = parseInt($(b).data('original-index')) || 0;
+                return valA - valB;
+            });
+            let tbody = $('#oduncTable tbody');
+            $.each(rowArray, function(index, row) {
+                if (index < currentlyShown) $(row).show(); else $(row).hide();
+                tbody.append(row); 
+            });
+        }
+        
+        // Load More Butonu Kontrolü
+        if (visibleRows.length > currentlyShown) {
+            if ($('#loadMoreBtn').length === 0) {
+                $('#oduncTable').after('<div class="text-center mt-4 mb-2" id="loadMoreContainer"><button id="loadMoreBtn" class="btn btn-outline-primary fw-bold" style="border-radius: 8px; padding: 8px 24px;"><i class="fa-solid fa-arrow-down me-2"></i>Daha Fazla Yükle</button></div>');
+                $('#loadMoreBtn').click(function() {
+                    currentlyShown += itemsPerPage;
+                    applyFilters();
+                });
+            } else {
+                $('#loadMoreContainer').show();
+            }
+        } else {
+            $('#loadMoreContainer').hide();
+        }
+    }
+</script>
+</body>
+</html>

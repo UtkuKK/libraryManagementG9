@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Sistem Ayarları - Library Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* GLASSMORPHISM GLOBAL OVERRIDES */
+        body { 
+            font-family: 'Inter', sans-serif !important; 
+            background: radial-gradient(circle at top left, #e0e7ff, transparent 50%),
+                        radial-gradient(circle at top right, #fbcfe8, transparent 50%),
+                        radial-gradient(circle at bottom left, #cffafe, transparent 50%),
+                        radial-gradient(circle at bottom right, #ede9fe, transparent 50%) !important;
+            background-color: #f8fafc !important;
+            background-attachment: fixed !important;
+            color: #1e293b; 
+            min-height: 100vh;
+        }
+        
+        .card-stats, .stat-card, .dashboard-card { 
+            background: rgba(255, 255, 255, 0.6) !important;
+            backdrop-filter: blur(16px) !important;
+            -webkit-backdrop-filter: blur(16px) !important;
+            border: 1px solid rgba(255, 255, 255, 0.9) !important; 
+            border-radius: 24px !important;
+            transition: all 0.3s ease !important; 
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.05) !important;
+        }
+        .card-stats:hover, .stat-card:hover { transform: translateY(-5px) !important; box-shadow: 0 15px 35px rgba(0,0,0,0.1) !important; }
+        
+        .modern-card, .card { 
+            border-radius: 24px !important; 
+            overflow: hidden !important; 
+            border: 1px solid rgba(255, 255, 255, 0.8) !important; 
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.05) !important; 
+            background: rgba(255, 255, 255, 0.6) !important; 
+            backdrop-filter: blur(16px) !important;
+            -webkit-backdrop-filter: blur(16px) !important;
+        }
+        
+        .modern-card .card-header, .card-header {
+            background: rgba(255, 255, 255, 0.4) !important;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.5) !important;
+        }
+        
+        .modern-card .card-body, .card-body { background: transparent !important; }
+        
+        .table { background: transparent !important; }
+        .table thead th { background: rgba(255, 255, 255, 0.5) !important; border-bottom: 1px solid rgba(255, 255, 255, 0.8) !important; color: #475569 !important; font-weight: 600 !important; text-transform: uppercase !important; font-size: 0.8rem !important; letter-spacing: 0.05em !important; }
+        .table tbody tr { background: transparent !important; transition: all 0.2s !important; }
+        .table tbody tr:hover { background: rgba(255, 255, 255, 0.8) !important; }
+        .table tbody td { border-bottom: 1px solid rgba(255, 255, 255, 0.5) !important; vertical-align: middle !important; }
+        
+        .form-control, .form-select { border-radius: 12px !important; border: 1px solid rgba(255, 255, 255, 0.8) !important; background: rgba(255, 255, 255, 0.7) !important; font-size: 14px !important; }
+        .form-control:focus, .form-select:focus { border-color: #4f46e5 !important; box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1) !important; background: #fff !important; }
+
+        body { font-family: 'Inter', sans-serif; background: #f8fafc; color: #1e293b; margin: 0; padding: 0; }
+        .content-area { padding: 2rem; }
+        .card-section { background: #fff; border-radius: 14px; border: 1px solid #e2e8f0; margin-bottom: 1.5rem; overflow: hidden; }
+        .card-section-header { padding: 1rem 1.5rem; border-bottom: 1px solid #f1f5f9; display: flex; align-items: center; justify-content: space-between; }
+        .section-icon { width: 36px; height: 36px; border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: 1rem; }
+        .form-label { font-weight: 600; font-size: 13px; color: #475569; }
+        .form-control, .form-select { border-radius: 8px; border: 1px solid #e2e8f0; font-size: 14px; }
+        .form-control:focus, .form-select:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
+        th { font-size: 12px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; }
+        td { vertical-align: middle; font-size: 14px; }
+        .btn-icon { width: 30px; height: 30px; display: inline-flex; align-items: center; justify-content: center; border-radius: 7px; font-size: 12px; border: none; cursor: pointer; transition: 0.2s; }
+        .nav-tabs-custom .nav-link { color: #64748b; font-weight: 600; border: none; padding: 0.75rem 1.5rem; border-radius: 0; border-bottom: 2px solid transparent; font-size: 14px; }
+        .nav-tabs-custom .nav-link.active { color: #3b82f6; border-bottom: 2px solid #3b82f6; background: transparent; }
+        .nav-tabs-custom { border-bottom: 1px solid #e2e8f0; background: #fff; }
+        .inline-form { background: #f8fafc; border-radius: 10px; padding: 1rem 1.5rem; margin: 1rem 1.5rem; border: 1px dashed #e2e8f0; }
+        .settings-search { max-width: 320px; font-size: 13px !important; }
+        .sortable-th { cursor: pointer; user-select: none; white-space: nowrap; }
+        .sortable-th i { margin-left: 6px; color: #94a3b8; font-size: 11px; }
+        .sortable-th.active i { color: #2563eb; }
+
+    </style>
+</head>
+<body>
+
+<div th:replace="~{admin/sidebar :: sidebar}"></div>
+
+<div class="content-area">
+    <div class="container-fluid">
+
+        <div class="d-flex align-items-center mb-4">
+            <div>
+                <h4 class="fw-bold mb-1">Sistem Ayarları</h4>
+                <p class="text-muted mb-0" style="font-size:14px">Kategori, yazar ve yayınevi kayıtlarını yönetin.</p>
+            </div>
+        </div>
+
+        <div th:if="${successMessage}" class="alert alert-success mb-3" style="border-radius:12px">
+            <i class="fa-solid fa-circle-check me-2"></i>
+            <span th:text="${successMessage}">İşlem başarılı.</span>
+        </div>
+
+        <div th:if="${errorMessage}" class="alert alert-danger mb-3" style="border-radius:12px">
+            <i class="fa-solid fa-triangle-exclamation me-2"></i>
+            <span th:text="${errorMessage}">Bir hata oluştu.</span>
+        </div>
+
+        <input type="hidden" id="activeTabFromServer" th:value="${activeTab}">
+
+        <ul class="nav nav-tabs-custom mb-0" style="border-radius:14px 14px 0 0;overflow:hidden">
+            <li class="nav-item"><a class="nav-link active" href="#kategoriler" data-bs-toggle="tab"><i class="fa-solid fa-tags me-2"></i>Kategoriler</a></li>
+            <li class="nav-item"><a class="nav-link" href="#yazarlar" data-bs-toggle="tab"><i class="fa-solid fa-pen-nib me-2"></i>Yazarlar</a></li>
+            <li class="nav-item"><a class="nav-link" href="#yayinevleri" data-bs-toggle="tab"><i class="fa-solid fa-building me-2"></i>Yayınevleri</a></li>
+        </ul>
+
+        <div class="tab-content">
+
+            <div class="tab-pane fade show active" id="kategoriler">
+                <div class="card-section" style="border-radius:0 0 14px 14px">
+                    <div class="inline-form">
+                        <form th:action="@{/admin/sistem-ayarlari/kategori/save}" method="post" class="row g-2 align-items-end">
+                            <div class="col-md-4">
+                                <label class="form-label">Kategori Adı *</label>
+                                <input type="text" name="ad" class="form-control" placeholder="Örn: Roman, Bilim Kurgu..." required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Açıklama</label>
+                                <input type="text" name="aciklama" class="form-control" placeholder="Kısa açıklama (isteğe bağlı)">
+                            </div>
+                            <div class="col-md-2">
+                                <button type="submit" class="btn btn-primary w-100" style="border-radius:8px;font-weight:600">
+                                    <i class="fa-solid fa-plus me-1"></i>Ekle
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="px-4 pb-2 d-flex justify-content-end">
+                        <div class="input-group settings-search">
+                            <span class="input-group-text" style="background:rgba(255,255,255,0.7);border-radius:12px 0 0 12px">
+                                <i class="fa-solid fa-magnifying-glass text-muted" style="font-size:13px"></i>
+                            </span>
+                            <input type="text" id="kategoriSearchInput" class="form-control" placeholder="Kategori ara..." style="border-radius:0 12px 12px 0">
+                        </div>
+                    </div>
+                    <div class="table-responsive px-2 pb-3">
+                        <table class="table table-hover mb-0" id="kategoriTable">
+                            <thead class="table-light">
+                            <tr>
+                                <th class="ps-3 sortable-th" data-sort-index="0" data-sort-type="number"># <i class="fa-solid fa-sort"></i></th>
+                                <th class="sortable-th" data-sort-index="1" data-sort-type="text">Kategori Adı <i class="fa-solid fa-sort"></i></th>
+                                <th class="sortable-th" data-sort-index="2" data-sort-type="text">Açıklama <i class="fa-solid fa-sort"></i></th>
+                                <th class="text-center">İşlemler</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="k : ${kategoriler}" class="settings-row">
+                                <td class="ps-3 text-muted" th:text="${k.id}">1</td>
+                                <td>
+                                    <span class="fw-600" th:text="${k.ad}">Kategori</span>
+                                </td>
+                                <td th:text="${k.aciklama != null ? k.aciklama : '-'}" class="text-muted">-</td>
+                                <td class="text-center">
+                                    <div class="d-flex gap-1 justify-content-center">
+                                        <button type="button" class="btn-icon" style="background:#f1f5f9;color:#3b82f6"
+                                                th:data-id="${k.id}"
+                                                th:data-ad="${k.ad}"
+                                                th:data-aciklama="${k.aciklama}"
+                                                onclick="openKategoriEdit(this.getAttribute('data-id'), this.getAttribute('data-ad'), this.getAttribute('data-aciklama'))"
+                                                title="Düzenle">
+                                            <i class="fa-solid fa-pen"></i>
+                                        </button>
+                                        <button type="button"
+                                                class="btn-icon"
+                                                style="background:#fef2f2;color:#ef4444"
+                                                title="Sil"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#deleteSettingModal"
+                                                th:data-delete-url="@{/admin/sistem-ayarlari/kategori/delete/{id}(id=${k.id})}"
+                                                th:data-delete-title="${k.ad}"
+                                                data-delete-type="kategori">
+                                            <i class="fa-solid fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr th:if="${#lists.isEmpty(kategoriler)}">
+                                <td colspan="4" class="text-center text-muted py-4">Henüz kategori eklenmemiş.</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-pane fade" id="yazarlar">
+                <div class="card-section" style="border-radius:0 0 14px 14px">
+                    <div class="inline-form">
+                        <form th:action="@{/admin/sistem-ayarlari/yazar/save}" method="post" class="row g-2 align-items-end">
+                            <div class="col-md-3">
+                                <label class="form-label">Ad *</label>
+                                <input type="text" name="ad" class="form-control" placeholder="Yazarın adı" required>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Soyad *</label>
+                                <input type="text" name="soyad" class="form-control" placeholder="Yazarın soyadı" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Biyografi</label>
+                                <input type="text" name="biyografi" class="form-control" placeholder="Kısa biyografi">
+                            </div>
+                            <div class="col-md-2">
+                                <button type="submit" class="btn btn-success w-100" style="border-radius:8px;font-weight:600">
+                                    <i class="fa-solid fa-plus me-1"></i>Ekle
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="px-4 pb-2 d-flex justify-content-end">
+                        <div class="input-group settings-search">
+                            <span class="input-group-text" style="background:rgba(255,255,255,0.7);border-radius:12px 0 0 12px">
+                                <i class="fa-solid fa-magnifying-glass text-muted" style="font-size:13px"></i>
+                            </span>
+                            <input type="text" id="yazarSearchInput" class="form-control" placeholder="Yazar ara..." style="border-radius:0 12px 12px 0">
+                        </div>
+                    </div>
+                    <div class="table-responsive px-2 pb-3">
+                        <table class="table table-hover mb-0" id="yazarTable">
+                            <thead class="table-light">
+                            <tr>
+                                <th class="ps-3 sortable-th" data-sort-index="0" data-sort-type="number"># <i class="fa-solid fa-sort"></i></th>
+                                <th class="sortable-th" data-sort-index="1" data-sort-type="text">Ad Soyad <i class="fa-solid fa-sort"></i></th>
+                                <th class="sortable-th" data-sort-index="2" data-sort-type="text">Biyografi <i class="fa-solid fa-sort"></i></th>
+                                <th class="text-center">İşlemler</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="y : ${yazarlar}" class="settings-row">
+                                <td class="ps-3 text-muted" th:text="${y.id}">1</td>
+                                <td class="fw-600" th:text="${y.adSoyad}">Ad Soyad</td>
+                                <td th:text="${y.biyografi != null ? y.biyografi : '-'}" class="text-muted" style="max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">-</td>
+                                <td class="text-center">
+                                    <div class="d-flex gap-1 justify-content-center">
+                                        <button type="button" class="btn-icon" style="background:#f1f5f9;color:#3b82f6"
+                                                th:data-id="${y.id}"
+                                                th:data-ad="${y.ad}"
+                                                th:data-soyad="${y.soyad}"
+                                                th:data-bio="${y.biyografi}"
+                                                onclick="openYazarEdit(this.getAttribute('data-id'), this.getAttribute('data-ad'), this.getAttribute('data-soyad'), this.getAttribute('data-bio'))"
+                                                title="Düzenle">
+                                            <i class="fa-solid fa-pen"></i>
+                                        </button>
+                                        <button type="button"
+                                                class="btn-icon"
+                                                style="background:#fef2f2;color:#ef4444"
+                                                title="Sil"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#deleteSettingModal"
+                                                th:data-delete-url="@{/admin/sistem-ayarlari/yazar/delete/{id}(id=${y.id})}"
+                                                th:data-delete-title="${y.adSoyad}"
+                                                data-delete-type="yazar">
+                                            <i class="fa-solid fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr th:if="${#lists.isEmpty(yazarlar)}">
+                                <td colspan="4" class="text-center text-muted py-4">Henüz yazar eklenmemiş.</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-pane fade" id="yayinevleri">
+                <div class="card-section" style="border-radius:0 0 14px 14px">
+                    <div class="inline-form">
+                        <form th:action="@{/admin/sistem-ayarlari/yayinevi/save}" method="post" class="row g-2 align-items-end">
+                            <div class="col-md-4">
+                                <label class="form-label">Yayınevi Adı *</label>
+                                <input type="text" name="ad" class="form-control" placeholder="Yayınevi adı" required>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Telefon</label>
+                                <input type="text" name="telefon" class="form-control" placeholder="0212 000 0000">
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Adres</label>
+                                <input type="text" name="adres" class="form-control" placeholder="Adres">
+                            </div>
+                            <div class="col-md-2">
+                                <button type="submit" class="btn btn-info w-100 text-white" style="border-radius:8px;font-weight:600">
+                                    <i class="fa-solid fa-plus me-1"></i>Ekle
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="px-4 pb-2 d-flex justify-content-end">
+                        <div class="input-group settings-search">
+                            <span class="input-group-text" style="background:rgba(255,255,255,0.7);border-radius:12px 0 0 12px">
+                                <i class="fa-solid fa-magnifying-glass text-muted" style="font-size:13px"></i>
+                            </span>
+                            <input type="text" id="yayineviSearchInput" class="form-control" placeholder="Yayınevi ara..." style="border-radius:0 12px 12px 0">
+                        </div>
+                    </div>
+                    <div class="table-responsive px-2 pb-3">
+                        <table class="table table-hover mb-0" id="yayineviTable">
+                            <thead class="table-light">
+                            <tr>
+                                <th class="ps-3 sortable-th" data-sort-index="0" data-sort-type="number"># <i class="fa-solid fa-sort"></i></th>
+                                <th class="sortable-th" data-sort-index="1" data-sort-type="text">Yayınevi Adı <i class="fa-solid fa-sort"></i></th>
+                                <th class="sortable-th" data-sort-index="2" data-sort-type="text">Telefon <i class="fa-solid fa-sort"></i></th>
+                                <th class="sortable-th" data-sort-index="3" data-sort-type="text">Adres <i class="fa-solid fa-sort"></i></th>
+                                <th class="text-center">İşlemler</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="yv : ${yayinevleri}" class="settings-row">
+                                <td class="ps-3 text-muted" th:text="${yv.id}">1</td>
+                                <td class="fw-600" th:text="${yv.ad}">Yayınevi</td>
+                                <td th:text="${yv.telefon != null ? yv.telefon : '-'}" class="text-muted">-</td>
+                                <td th:text="${yv.adres != null ? yv.adres : '-'}" class="text-muted">-</td>
+                                <td class="text-center">
+                                    <div class="d-flex gap-1 justify-content-center">
+                                        <button type="button" class="btn-icon" style="background:#f1f5f9;color:#3b82f6"
+                                                th:data-id="${yv.id}"
+                                                th:data-ad="${yv.ad}"
+                                                th:data-telefon="${yv.telefon}"
+                                                th:data-adres="${yv.adres}"
+                                                onclick="openYayineviEdit(this.getAttribute('data-id'), this.getAttribute('data-ad'), this.getAttribute('data-telefon'), this.getAttribute('data-adres'))"
+                                                title="Düzenle">
+                                            <i class="fa-solid fa-pen"></i>
+                                        </button>
+                                        <button type="button"
+                                                class="btn-icon"
+                                                style="background:#fef2f2;color:#ef4444"
+                                                title="Sil"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#deleteSettingModal"
+                                                th:data-delete-url="@{/admin/sistem-ayarlari/yayinevi/delete/{id}(id=${yv.id})}"
+                                                th:data-delete-title="${yv.ad}"
+                                                data-delete-type="yayınevi">
+                                            <i class="fa-solid fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr th:if="${#lists.isEmpty(yayinevleri)}">
+                                <td colspan="5" class="text-center text-muted py-4">Henüz yayınevi eklenmemiş.</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="kategoriEditModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content" style="border-radius:14px">
+            <div class="modal-header border-0"><h5 class="modal-title fw-bold"><i class="fa-solid fa-tags me-2 text-primary"></i>Kategori Düzenle</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+            <form id="kategoriEditForm" method="post">
+                <div class="modal-body">
+                    <div class="mb-3"><label class="form-label">Kategori Adı *</label><input type="text" name="ad" id="kEditAd" class="form-control" required></div>
+                    <div class="mb-3"><label class="form-label">Açıklama</label><input type="text" name="aciklama" id="kEditAciklama" class="form-control"></div>
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal" style="border-radius:8px">İptal</button>
+                    <button type="submit" class="btn btn-primary" style="border-radius:8px;font-weight:600"><i class="fa-solid fa-save me-2"></i>Güncelle</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="yazarEditModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content" style="border-radius:14px">
+            <div class="modal-header border-0"><h5 class="modal-title fw-bold"><i class="fa-solid fa-pen-nib me-2 text-success"></i>Yazar Düzenle</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+            <form id="yazarEditForm" method="post">
+                <div class="modal-body">
+                    <div class="row g-3">
+                        <div class="col-6"><label class="form-label">Ad *</label><input type="text" name="ad" id="yEditAd" class="form-control" required></div>
+                        <div class="col-6"><label class="form-label">Soyad *</label><input type="text" name="soyad" id="yEditSoyad" class="form-control" required></div>
+                        <div class="col-12"><label class="form-label">Biyografi</label><textarea name="biyografi" id="yEditBio" class="form-control" rows="3"></textarea></div>
+                    </div>
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal" style="border-radius:8px">İptal</button>
+                    <button type="submit" class="btn btn-success" style="border-radius:8px;font-weight:600"><i class="fa-solid fa-save me-2"></i>Güncelle</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="yayineviEditModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content" style="border-radius:14px">
+            <div class="modal-header border-0"><h5 class="modal-title fw-bold"><i class="fa-solid fa-building me-2 text-info"></i>Yayınevi Düzenle</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+            <form id="yayineviEditForm" method="post">
+                <div class="modal-body">
+                    <div class="mb-3"><label class="form-label">Yayınevi Adı *</label><input type="text" name="ad" id="yvEditAd" class="form-control" required></div>
+                    <div class="mb-3"><label class="form-label">Telefon</label><input type="text" name="telefon" id="yvEditTelefon" class="form-control"></div>
+                    <div class="mb-3"><label class="form-label">Adres</label><input type="text" name="adres" id="yvEditAdres" class="form-control"></div>
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal" style="border-radius:8px">İptal</button>
+                    <button type="submit" class="btn btn-info text-white" style="border-radius:8px;font-weight:600"><i class="fa-solid fa-save me-2"></i>Güncelle</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+<div class="modal fade" id="deleteSettingModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius:18px;border:none;">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold">
+                    <i class="fa-solid fa-triangle-exclamation text-danger me-2"></i>
+                    Kayıt Silinsin mi?
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p class="mb-1">
+                    <strong id="deleteSettingTitle">Bu kayıt</strong> silinecek.
+                </p>
+                <p class="text-muted mb-0" style="font-size:14px">
+                    Bu işlem geri alınamaz. Kayıt kitaplarda kullanılıyorsa sistem silmeye izin vermeyebilir.
+                </p>
+            </div>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-light px-4" data-bs-dismiss="modal" style="border-radius:10px">
+                    Vazgeç
+                </button>
+                <a id="confirmDeleteSettingBtn" href="#" class="btn btn-danger px-4" style="border-radius:10px;font-weight:600">
+                    <i class="fa-solid fa-trash me-2"></i>Sil
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    function openKategoriEdit(id, ad, aciklama) {
+        document.getElementById('kEditAd').value = ad || '';
+        document.getElementById('kEditAciklama').value = (aciklama && aciklama !== 'null') ? aciklama : '';
+        document.getElementById('kategoriEditForm').action = '/admin/sistem-ayarlari/kategori/update/' + id;
+        new bootstrap.Modal(document.getElementById('kategoriEditModal')).show();
+    }
+    function openYazarEdit(id, ad, soyad, bio) {
+        document.getElementById('yEditAd').value = ad || '';
+        document.getElementById('yEditSoyad').value = soyad || '';
+        document.getElementById('yEditBio').value = (bio && bio !== 'null') ? bio : '';
+        document.getElementById('yazarEditForm').action = '/admin/sistem-ayarlari/yazar/update/' + id;
+        new bootstrap.Modal(document.getElementById('yazarEditModal')).show();
+    }
+    function openYayineviEdit(id, ad, telefon, adres) {
+        document.getElementById('yvEditAd').value = ad || '';
+        document.getElementById('yvEditTelefon').value = (telefon && telefon !== 'null') ? telefon : '';
+        document.getElementById('yvEditAdres').value = (adres && adres !== 'null') ? adres : '';
+        document.getElementById('yayineviEditForm').action = '/admin/sistem-ayarlari/yayinevi/update/' + id;
+        new bootstrap.Modal(document.getElementById('yayineviEditModal')).show();
+    }
+
+    function setupLiveSearch(inputId, tableId, emptyColspan) {
+        const input = document.getElementById(inputId);
+        const table = document.getElementById(tableId);
+        if (!input || !table) return;
+
+        const tbody = table.querySelector('tbody');
+        const rows = Array.from(tbody.querySelectorAll('tr')).filter(row => !row.querySelector('td[colspan]'));
+
+        input.addEventListener('input', function () {
+            const q = this.value.toLowerCase().trim();
+            let visibleCount = 0;
+
+            rows.forEach(row => {
+                const match = row.textContent.toLowerCase().includes(q);
+                row.style.display = match ? '' : 'none';
+                if (match) visibleCount++;
+            });
+
+            let noResult = document.getElementById(tableId + 'NoResult');
+            if (visibleCount === 0 && rows.length > 0) {
+                if (!noResult) {
+                    noResult = document.createElement('tr');
+                    noResult.id = tableId + 'NoResult';
+                    noResult.innerHTML = `<td colspan="${emptyColspan}" class="text-center text-muted py-4"><i class="fa-solid fa-magnifying-glass fa-2x mb-2 d-block"></i>Aramanıza uygun kayıt bulunamadı.</td>`;
+                    tbody.appendChild(noResult);
+                }
+                noResult.style.display = '';
+            } else if (noResult) {
+                noResult.style.display = 'none';
+            }
+        });
+
+        input.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') e.preventDefault();
+        });
+    }
+
+    function setupSortableTable(tableId) {
+        const table = document.getElementById(tableId);
+        if (!table) return;
+
+        const tbody = table.querySelector('tbody');
+        const headers = table.querySelectorAll('.sortable-th');
+        let currentSortIndex = null;
+        let currentDirection = 'asc';
+        let currentSortType = 'text';
+
+        headers.forEach(header => {
+            header.addEventListener('click', function () {
+                const sortIndex = Number(this.getAttribute('data-sort-index'));
+                const sortType = this.getAttribute('data-sort-type') || 'text';
+
+                if (currentSortIndex === sortIndex) {
+                    currentDirection = currentDirection === 'asc' ? 'desc' : 'asc';
+                } else {
+                    currentSortIndex = sortIndex;
+                    currentDirection = 'asc';
+                    currentSortType = sortType;
+                }
+
+                headers.forEach(th => {
+                    th.classList.remove('active');
+                    const icon = th.querySelector('i');
+                    if (icon) icon.className = 'fa-solid fa-sort';
+                });
+
+                this.classList.add('active');
+                const icon = this.querySelector('i');
+                if (icon) icon.className = currentDirection === 'asc' ? 'fa-solid fa-sort-up' : 'fa-solid fa-sort-down';
+
+                const rows = Array.from(tbody.querySelectorAll('tr')).filter(row => !row.querySelector('td[colspan]'));
+
+                rows.sort((a, b) => {
+                    let aText = a.children[sortIndex]?.innerText.trim() || '';
+                    let bText = b.children[sortIndex]?.innerText.trim() || '';
+
+                    if (currentSortType === 'number') {
+                        const aNum = parseFloat(aText.replace(/[^\d.-]/g, '')) || 0;
+                        const bNum = parseFloat(bText.replace(/[^\d.-]/g, '')) || 0;
+                        return currentDirection === 'asc' ? aNum - bNum : bNum - aNum;
+                    }
+
+                    return currentDirection === 'asc'
+                        ? aText.localeCompare(bText, 'tr', { sensitivity: 'base' })
+                        : bText.localeCompare(aText, 'tr', { sensitivity: 'base' });
+                });
+
+                rows.forEach(row => tbody.appendChild(row));
+            });
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const activeTabFromServer = document.getElementById('activeTabFromServer')?.value;
+        const hashTab = window.location.hash;
+        const savedTab = activeTabFromServer ? '#' + activeTabFromServer : (hashTab || localStorage.getItem('sistemAyarlariTab'));
+
+        if (savedTab) {
+            const tab = document.querySelector('[href="' + savedTab + '"]');
+            if (tab) new bootstrap.Tab(tab).show();
+        }
+
+        document.querySelectorAll('.nav-link').forEach(function(tab) {
+            tab.addEventListener('shown.bs.tab', function(e) {
+                localStorage.setItem('sistemAyarlariTab', e.target.getAttribute('href'));
+            });
+        });
+
+        setupLiveSearch('kategoriSearchInput', 'kategoriTable', 4);
+        setupLiveSearch('yazarSearchInput', 'yazarTable', 4);
+        setupLiveSearch('yayineviSearchInput', 'yayineviTable', 5);
+
+        setupSortableTable('kategoriTable');
+        setupSortableTable('yazarTable');
+        setupSortableTable('yayineviTable');
+
+        const deleteModal = document.getElementById('deleteSettingModal');
+        if (deleteModal) {
+            deleteModal.addEventListener('show.bs.modal', function(event) {
+                const button = event.relatedTarget;
+                const url = button.getAttribute('data-delete-url');
+                const title = button.getAttribute('data-delete-title');
+                const type = button.getAttribute('data-delete-type');
+
+                document.getElementById('confirmDeleteSettingBtn').setAttribute('href', url);
+                document.getElementById('deleteSettingTitle').textContent = title ? `${title} adlı ${type}` : 'Bu kayıt';
+            });
+        }
+    });
+</script>
+</body>
+</html>

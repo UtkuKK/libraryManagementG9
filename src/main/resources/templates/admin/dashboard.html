@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Yönetim Paneli - Library Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* GLASSMORPHISM GLOBAL OVERRIDES */
+        body { 
+            font-family: 'Inter', sans-serif !important; 
+            background: radial-gradient(circle at top left, #e0e7ff, transparent 50%),
+                        radial-gradient(circle at top right, #fbcfe8, transparent 50%),
+                        radial-gradient(circle at bottom left, #cffafe, transparent 50%),
+                        radial-gradient(circle at bottom right, #ede9fe, transparent 50%) !important;
+            background-color: #f8fafc !important;
+            background-attachment: fixed !important;
+            color: #1e293b; 
+            min-height: 100vh;
+        }
+        
+        .card-stats, .stat-card, .dashboard-card { 
+            background: rgba(255, 255, 255, 0.6) !important;
+            backdrop-filter: blur(16px) !important;
+            -webkit-backdrop-filter: blur(16px) !important;
+            border: 1px solid rgba(255, 255, 255, 0.9) !important; 
+            border-radius: 24px !important;
+            transition: all 0.3s ease !important; 
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.05) !important;
+        }
+        .card-stats:hover, .stat-card:hover { transform: translateY(-5px) !important; box-shadow: 0 15px 35px rgba(0,0,0,0.1) !important; }
+        
+        .modern-card, .card { 
+            border-radius: 24px !important; 
+            overflow: hidden !important; 
+            border: 1px solid rgba(255, 255, 255, 0.8) !important; 
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.05) !important; 
+            background: rgba(255, 255, 255, 0.6) !important; 
+            backdrop-filter: blur(16px) !important;
+            -webkit-backdrop-filter: blur(16px) !important;
+        }
+        
+        .modern-card .card-header, .card-header {
+            background: rgba(255, 255, 255, 0.4) !important;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.5) !important;
+        }
+        
+        .modern-card .card-body, .card-body { background: transparent !important; }
+        
+        .table { background: transparent !important; }
+        .table thead th { background: rgba(255, 255, 255, 0.5) !important; border-bottom: 1px solid rgba(255, 255, 255, 0.8) !important; color: #475569 !important; font-weight: 600 !important; text-transform: uppercase !important; font-size: 0.8rem !important; letter-spacing: 0.05em !important; }
+        .table tbody tr { background: transparent !important; transition: all 0.2s !important; }
+        .table tbody tr:hover { background: rgba(255, 255, 255, 0.8) !important; }
+        .table tbody td { border-bottom: 1px solid rgba(255, 255, 255, 0.5) !important; vertical-align: middle !important; }
+        
+        .bg-active-yellow { background-color: #eab308 !important; color: white !important; }
+
+        .form-control, .form-select { border-radius: 12px !important; border: 1px solid rgba(255, 255, 255, 0.8) !important; background: rgba(255, 255, 255, 0.7) !important; font-size: 14px !important; }
+        .form-control:focus, .form-select:focus { border-color: #4f46e5 !important; box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1) !important; background: #fff !important; }
+
+        body { font-family: 'Inter', sans-serif; background-color: #f1f5f9; color: #1e293b; margin: 0; padding: 0; }
+        
+        /* Glassmorphism for Stats Cards */
+        .card-stats { 
+            background: rgba(255, 255, 255, 0.7) !important;
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.9) !important; 
+            border-radius: 16px !important;
+            transition: all 0.3s ease; 
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.05) !important;
+        }
+        .card-stats:hover { transform: translateY(-5px); box-shadow: 0 15px 35px rgba(0,0,0,0.1) !important; }
+        
+        .content-area { padding: 2rem; }
+        .icon-box { width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; border-radius: 10px; font-size: 1.5rem; }
+        .quick-action-btn { transition: all 0.2s; border-radius: 8px; font-weight: 500; display: flex; align-items: center; padding: 12px 16px; border: 1px solid #e2e8f0; background: #fff; text-decoration: none; color: #1e293b; margin-bottom: 12px; }
+        .quick-action-btn:hover { background: #f1f5f9; border-color: #cbd5e1; transform: translateX(4px); }
+        .quick-action-btn i { font-size: 1.2rem; width: 30px; }
+    </style>
+</head>
+<body>
+
+<div th:replace="~{admin/sidebar :: sidebar}" id="sidebar" class="sidebar">
+    <!-- Statik önizleme için (Thymeleaf çalıştırılmadığında tarayıcının göreceği kod) -->
+    <div class="sidebar-header">
+        <h5 class="sidebar-title m-0">Library Admin</h5>
+        <button class="toggle-btn" id="sidebarToggle"><i class="fa-solid fa-bars"></i></button>
+    </div>
+    <ul class="nav flex-column mt-3">
+        <li class="nav-item"><a th:href="@{/admin/dashboard}" href="dashboard.html" class="nav-link"><i class="fa-solid fa-chart-pie"></i><span class="sidebar-text">Dashboard</span></a></li>
+        <li class="nav-item"><a href="#" class="nav-link"><i class="fa-solid fa-book"></i><span class="sidebar-text">Kitap Listeleri</span></a></li>
+        <li class="nav-item"><a href="#" class="nav-link"><i class="fa-solid fa-users"></i><span class="sidebar-text">Kullanıcılar</span></a></li>
+        <li class="nav-item"><a th:href="@{/odunc-islemleri}" href="odunc.html" class="nav-link"><i class="fa-solid fa-hand-holding-hand"></i><span class="sidebar-text">Ödünç İşlemleri</span></a></li>
+        <li class="nav-item"><a th:href="@{/cezalar}" href="ceza.html" class="nav-link"><i class="fa-solid fa-money-bill-wave"></i><span class="sidebar-text">Cezalar</span></a></li>
+        <li class="nav-item"><a href="#" class="nav-link"><i class="fa-solid fa-calendar-check"></i><span class="sidebar-text">Rezervasyonlar</span></a></li>
+        <li class="nav-item"><a href="#" class="nav-link"><i class="fa-solid fa-gear"></i><span class="sidebar-text">Sistem Ayarları</span></a></li>
+    </ul>
+    <style>
+        .sidebar { width: 260px; background: #1e293b; color: #fff; min-height: 100vh; position: fixed; top: 0; left: 0; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); z-index: 1000; overflow-y: auto; box-shadow: 4px 0 10px rgba(0,0,0,0.1); }
+        .sidebar.collapsed { width: 76px; }
+        .sidebar-header { display: flex; justify-content: space-between; align-items: center; padding: 24px 20px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .sidebar.collapsed .sidebar-title { display: none; }
+        .sidebar .nav { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; }
+        .sidebar .nav-item { margin-bottom: 4px; }
+        .sidebar .nav-link { color: #cbd5e1; padding: 14px 24px; transition: 0.2s; white-space: nowrap; overflow: hidden; display: flex; align-items: center; text-decoration: none; font-size: 15px; font-weight: 500; }
+        .sidebar .nav-link:hover { color: #fff; background: rgba(255,255,255,0.1); border-left: 4px solid #3b82f6; padding-left: 20px; }
+        .sidebar .nav-link i { min-width: 32px; font-size: 1.25rem; text-align: center; margin-right: 12px; }
+        .sidebar.collapsed .nav-link i { margin-right: 0; }
+        .sidebar .sidebar-text { transition: opacity 0.3s; }
+        .sidebar.collapsed .sidebar-text { opacity: 0; display: none; }
+        .toggle-btn { background: transparent; color: #cbd5e1; border: none; font-size: 1.25rem; cursor: pointer; padding: 4px; border-radius: 4px; transition: 0.2s; }
+        .toggle-btn:hover { color: #fff; background: rgba(255,255,255,0.1); }
+        .content-area { margin-left: 260px; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); min-height: 100vh; }
+        .content-area.collapsed { margin-left: 76px; }
+    </style>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const sidebar = document.getElementById('sidebar');
+            const contentArea = document.querySelector('.content-area');
+            const toggleBtn = document.getElementById('sidebarToggle');
+            
+            if(localStorage.getItem('sidebarCollapsed') === 'true') {
+                if(sidebar) sidebar.classList.add('collapsed');
+                if(contentArea) contentArea.classList.add('collapsed');
+            }
+
+            if(toggleBtn) {
+                toggleBtn.addEventListener('click', function() {
+                    if(sidebar) sidebar.classList.toggle('collapsed');
+                    if(contentArea) contentArea.classList.toggle('collapsed');
+                    if(sidebar) localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'));
+                });
+            }
+        });
+    </script>
+</div>
+
+<div class="content-area">
+    <div class="container-fluid">
+        <!-- Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h1 class="h2 fw-bold text-dark m-0">Dashboard</h1>
+
+            </div>
+        </div>
+
+        <!-- Stats Cards Grid -->
+        <div class="row g-4 mb-5">
+            <div class="col-12 col-sm-6 col-xl-3">
+                <div class="card card-stats shadow-sm bg-white p-3 border-0">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <span class="text-muted fw-bold small">TOPLAM KİTAP</span>
+                            <h3 class="fw-bold mt-1 text-dark" th:text="${totalBooks ?: 68}">68</h3>
+                        </div>
+                        <div class="icon-box bg-primary bg-opacity-10 text-primary">
+                            <i class="fa-solid fa-book"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-sm-6 col-xl-3">
+                <div class="card card-stats shadow-sm bg-white p-3 border-0">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <span class="text-muted fw-bold small">AKTİF ÖDÜNÇ</span>
+                            <h3 class="fw-bold mt-1" style="color: #eab308;" th:text="${activeBorrowings ?: 5}">5</h3>
+                        </div>
+                        <div class="icon-box" style="background-color: #fef3c7; color: #eab308;">
+                            <i class="fa-solid fa-hand-holding-hand"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-sm-6 col-xl-3">
+                <div class="card card-stats shadow-sm bg-white p-3 border-0">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <span class="text-muted fw-bold small">GECİKMİŞ İADE</span>
+                            <h3 class="fw-bold mt-1 text-danger" th:text="${overdueCount ?: 2}">2</h3>
+                        </div>
+                        <div class="icon-box bg-danger bg-opacity-10 text-danger">
+                            <i class="fa-solid fa-clock"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-sm-6 col-xl-3">
+                <div class="card card-stats shadow-sm bg-white p-3 border-0">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <span class="text-muted fw-bold small">TOPLAM ÜYE</span>
+                            <h3 class="fw-bold mt-1 text-info" th:text="${totalUsers ?: 42}">42</h3>
+                        </div>
+                        <div class="icon-box bg-info bg-opacity-10 text-info">
+                            <i class="fa-solid fa-users"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4 align-items-stretch">
+            <!-- Recent Activity Table -->
+            <div class="col-12 col-lg-8">
+                <div class="card shadow-sm border-0 h-100" style="border-radius: 16px; overflow: hidden;">
+                    <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center">
+                        <h5 class="m-0 fw-bold text-dark">Son Ödünç İşlemleri</h5>
+                        <a th:href="@{/odunc-islemleri}" href="odunc.html" class="btn btn-sm btn-outline-primary" style="border-radius: 8px;">Tümünü Gör</a>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Kullanıcı</th>
+                                        <th>Kitap</th>
+                                        <th>Teslim Tarihi</th>
+                                        <th>Durum</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="odunc : ${recentBorrows}">
+                                        <td th:text="${odunc.kullaniciAdi != null ? odunc.kullaniciAdi : odunc.kullaniciId}">Ahmet Yılmaz</td>
+                                        <td th:text="${odunc.kitapBaslik != null ? odunc.kitapBaslik : odunc.kopyaId}">Simyacı</td>
+                                        <td th:text="${odunc.teslimTarihi != null ? #temporals.format(odunc.teslimTarihi, 'dd/MM/yyyy') : '-'}">15/05/2026</td>
+                                        <td>
+                                            <span class="badge" th:classappend="${odunc.durum == 'GECIKMIS' ? 'bg-danger' : 'bg-active-yellow'}" th:text="${odunc.durum == 'GECIKMIS' ? 'Gecikmiş' : 'Devam Ediyor'}">Devam Ediyor</span>
+                                        </td>
+                                    </tr>
+                                    <!-- Fallback row for static preview -->
+                                    <tr th:if="${#lists.isEmpty(recentBorrows)}">
+                                        <td>Mehmet Can</td>
+                                        <td>Nutuk</td>
+                                        <td>2026-06-01</td>
+                                        <td><span class="badge bg-active-yellow">Devam Ediyor</span></td>
+                                    </tr>
+                                    <tr th:if="${#lists.isEmpty(recentBorrows)}">
+                                        <td>Ayşe Demir</td>
+                                        <td>Sefiller</td>
+                                        <td>2026-05-10</td>
+                                        <td><span class="badge bg-danger">Gecikmiş</span></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions Panel -->
+            <div class="col-12 col-lg-4">
+                <div class="card shadow-sm border-0 h-100" style="border-radius: 16px; overflow: hidden;">
+                    <div class="card-header bg-white border-bottom py-3">
+                        <h5 class="m-0 fw-bold text-dark">Hızlı İşlemler</h5>
+                    </div>
+                    <div class="card-body">
+                        <a th:href="@{/odunc-islemleri}" href="odunc.html" class="quick-action-btn">
+                            <i class="fa-solid fa-hand-holding-hand text-primary"></i>
+                            <div>
+                                <div class="fw-bold">Ödünç Kitap Ver</div>
+                                <span class="text-muted small">Yeni bir ödünç kaydı açın</span>
+                            </div>
+                        </a>
+                        <a th:href="@{/odunc-islemleri}" href="odunc.html" class="quick-action-btn">
+                            <i class="fa-solid fa-reply text-success"></i>
+                            <div>
+                                <div class="fw-bold">İade İşlemi Yap</div>
+                                <span class="text-muted small">Kitap iadesi alın</span>
+                            </div>
+                        </a>
+                        <a th:href="@{/cezalar}" href="ceza.html" class="quick-action-btn">
+                            <i class="fa-solid fa-money-bill-wave text-danger"></i>
+                            <div>
+                                <div class="fw-bold">Cezaları Yönet</div>
+                                <span class="text-muted small">Gecikme cezalarını inceleyin</span>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- YENİ WIDGETLAR (Kitaplar, Üyeler, Rezervasyonlar) -->
+        <div class="row g-4 mt-2 mb-5">
+            <!-- Son Eklenen Kitaplar -->
+            <div class="col-12 col-lg-4">
+                <div class="card shadow-sm border-0 rounded-3 h-100">
+                    <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center">
+                        <h5 class="m-0 fw-bold text-dark">Son Eklenen Kitaplar</h5>
+                        <a href="#" class="btn btn-sm btn-light">Tümünü Gör</a>
+                    </div>
+                    <div class="card-body p-0">
+                        <ul class="list-group list-group-flush rounded-bottom">
+                            <li class="list-group-item d-flex justify-content-between align-items-center py-3 border-light" th:each="kitap : ${recentBooks}">
+                                <div class="d-flex align-items-center">
+                                    <div class="icon-box bg-primary bg-opacity-10 text-primary me-3" style="width: 40px; height: 40px; font-size: 1.1rem;">
+                                        <i class="fa-solid fa-book-open"></i>
+                                    </div>
+                                    <div>
+                                        <h6 class="mb-0 fw-bold text-dark" th:text="${kitap.baslik}">Sefiller</h6>
+                                        <small class="text-muted" th:text="${kitap.yazar != null ? kitap.yazar.ad : 'Bilinmiyor'}">Victor Hugo</small>
+                                    </div>
+                                </div>
+                                <span class="badge bg-light text-dark border" th:text="'Stok: ' + ${kitap.stok}">Stok: 5</span>
+                            </li>
+                            <!-- Fallback -->
+                            <li class="list-group-item py-3 text-center text-muted" th:if="${#lists.isEmpty(recentBooks)}">
+                                Henüz kitap eklenmemiş.
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Yeni Üyeler -->
+            <div class="col-12 col-lg-4">
+                <div class="card shadow-sm border-0 rounded-3 h-100">
+                    <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center">
+                        <h5 class="m-0 fw-bold text-dark">Yeni Üyeler</h5>
+                        <a href="#" class="btn btn-sm btn-light">Tümünü Gör</a>
+                    </div>
+                    <div class="card-body p-0">
+                        <ul class="list-group list-group-flush rounded-bottom">
+                            <li class="list-group-item d-flex justify-content-between align-items-center py-3 border-light" th:each="user : ${recentUsers}">
+                                <div class="d-flex align-items-center">
+                                    <div class="icon-box bg-info bg-opacity-10 text-info me-3" style="width: 40px; height: 40px; font-size: 1.1rem; border-radius: 50%;">
+                                        <i class="fa-solid fa-user"></i>
+                                    </div>
+                                    <div>
+                                        <h6 class="mb-0 fw-bold text-dark" th:text="${user.ad + ' ' + user.soyad}">Ahmet Yılmaz</h6>
+                                        <small class="text-muted" th:text="${user.email}">ahmet@mail.com</small>
+                                    </div>
+                                </div>
+                            </li>
+                            <li class="list-group-item py-3 text-center text-muted" th:if="${#lists.isEmpty(recentUsers)}">
+                                Henüz üye bulunmuyor.
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Son Rezervasyonlar -->
+            <div class="col-12 col-lg-4">
+                <div class="card shadow-sm border-0 rounded-3 h-100">
+                    <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center">
+                        <h5 class="m-0 fw-bold text-dark">Son Rezervasyonlar</h5>
+                        <a href="#" class="btn btn-sm btn-light">Tümünü Gör</a>
+                    </div>
+                    <div class="card-body p-0">
+                        <ul class="list-group list-group-flush rounded-bottom">
+                            <li class="list-group-item d-flex justify-content-between align-items-center py-3 border-light" th:each="rez : ${recentReservations}">
+                                <div class="d-flex align-items-center">
+                                    <div class="icon-box bg-warning bg-opacity-10 text-warning me-3" style="width: 40px; height: 40px; font-size: 1.1rem;">
+                                        <i class="fa-solid fa-bookmark"></i>
+                                    </div>
+                                    <div>
+                                        <h6 class="mb-0 fw-bold text-dark" th:text="${rez.kitap.baslik}">1984</h6>
+                                        <small class="text-muted" th:text="${rez.kullanici.ad + ' ' + rez.kullanici.soyad}">Ali Veli</small>
+                                    </div>
+                                </div>
+                                <span class="badge" th:classappend="${rez.durum == 'BEKLEMEDE' ? 'bg-warning text-dark' : 'bg-success'}" th:text="${rez.durum}">BEKLEMEDE</span>
+                            </li>
+                            <li class="list-group-item py-3 text-center text-muted" th:if="${#lists.isEmpty(recentReservations)}">
+                                Bekleyen rezervasyon yok.
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

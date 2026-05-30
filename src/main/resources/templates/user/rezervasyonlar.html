@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Rezervasyonlarım - Library User</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif !important;
+            background: radial-gradient(circle at top left, #e0e7ff, transparent 50%),
+                        radial-gradient(circle at top right, #fbcfe8, transparent 50%),
+                        radial-gradient(circle at bottom left, #cffafe, transparent 50%),
+                        radial-gradient(circle at bottom right, #ede9fe, transparent 50%) !important;
+            background-color: #f8fafc !important;
+            background-attachment: fixed !important;
+            color: #1e293b;
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+        }
+
+        .card-stats, .stat-card, .dashboard-card {
+            background: rgba(255, 255, 255, 0.6) !important;
+            backdrop-filter: blur(16px) !important;
+            -webkit-backdrop-filter: blur(16px) !important;
+            border: 1px solid rgba(255, 255, 255, 0.9) !important;
+            border-radius: 24px !important;
+            transition: all 0.3s ease !important;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.05) !important;
+        }
+
+        .card-stats:hover, .stat-card:hover {
+            transform: translateY(-5px) !important;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1) !important;
+        }
+
+        .modern-card, .card {
+            border-radius: 24px !important;
+            overflow: hidden !important;
+            border: 1px solid rgba(255, 255, 255, 0.8) !important;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.05) !important;
+            background: rgba(255, 255, 255, 0.6) !important;
+            backdrop-filter: blur(16px) !important;
+            -webkit-backdrop-filter: blur(16px) !important;
+        }
+
+        .modern-card .card-header, .card-header {
+            background: rgba(255, 255, 255, 0.4) !important;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.5) !important;
+        }
+
+        .modern-card .card-body, .card-body {
+            background: transparent !important;
+        }
+
+        .table {
+            background: transparent !important;
+        }
+
+        .table thead th {
+            background: rgba(255, 255, 255, 0.5) !important;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.8) !important;
+            color: #475569 !important;
+            font-weight: 600 !important;
+            text-transform: uppercase !important;
+            font-size: 0.8rem !important;
+            letter-spacing: 0.05em !important;
+        }
+
+        .table tbody tr {
+            background: transparent !important;
+            transition: all 0.2s !important;
+        }
+
+        .table tbody tr:hover {
+            background: rgba(255, 255, 255, 0.8) !important;
+        }
+
+        .table tbody td {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.5) !important;
+            vertical-align: middle !important;
+        }
+
+        .form-control, .form-select {
+            border-radius: 12px !important;
+            border: 1px solid rgba(255, 255, 255, 0.8) !important;
+            background: rgba(255, 255, 255, 0.7) !important;
+            font-size: 14px !important;
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: #4f46e5 !important;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1) !important;
+            background: #fff !important;
+        }
+
+        .content-area {
+            padding: 2rem;
+        }
+
+        .table-card {
+            background: #fff;
+            border-radius: 14px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+        }
+
+        .section-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #1e293b;
+        }
+
+        th {
+            font-size: 12px;
+            font-weight: 600;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        td {
+            vertical-align: middle;
+            font-size: 14px;
+        }
+
+        .badge-durum {
+            border-radius: 20px;
+            padding: 5px 12px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .badge-beklemede { background: #fef9c3; color: #854d0e; }
+        .badge-onaylandi { background: #dbeafe; color: #1d4ed8; }
+        .badge-hazir { background: #dcfce7; color: #166534; }
+        .badge-iptal { background: #fee2e2; color: #991b1b; }
+    </style>
+</head>
+
+<body>
+
+<div th:replace="~{user/sidebar :: sidebar}"></div>
+
+<div class="content-area">
+    <div class="container-fluid">
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h4 class="fw-bold mb-1">Rezervasyonlarım</h4>
+                <p class="text-muted mb-0" style="font-size:14px">
+                    Oluşturduğunuz kitap rezervasyonlarını buradan takip edebilirsiniz.
+                </p>
+            </div>
+
+            <a th:href="@{/user/kitap-ara}" class="btn btn-primary">
+                <i class="fa-solid fa-magnifying-glass me-2"></i>Kitap Ara
+            </a>
+        </div>
+
+        <div th:if="${param.success}" class="alert alert-success">
+            Rezervasyon isteğiniz başarıyla oluşturuldu.
+        </div>
+
+        <div class="table-card p-4">
+            <h5 class="section-title mb-3">Rezervasyon Listesi</h5>
+
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Kitap</th>
+                        <th>Raf Yeri</th>
+                        <th>Rezervasyon Tarihi</th>
+                        <th>Durum</th>
+                        <th>Açıklama</th>
+                        <th>İşlem</th>
+                    </tr>
+                    </thead>
+
+                    <tbody>
+                    <tr th:each="rez : ${rezervasyonlar}">
+                        <td th:text="${rez.id}">1</td>
+
+                        <td>
+                            <strong th:text="${rez.kitap != null ? rez.kitap.baslik : '-'}">Kitap</strong>
+                            <div class="text-muted"
+                                 style="font-size:12px"
+                                 th:text="${rez.kitap != null ? 'ISBN: ' + rez.kitap.isbn : ''}">
+                                ISBN
+                            </div>
+                        </td>
+
+                        <td th:text="${rez.kitap != null and rez.kitap.rafYeri != null ? rez.kitap.rafYeri : '-'}">-</td>
+
+                        <td th:text="${rez.rezervasyonTarihi != null ? #temporals.format(rez.rezervasyonTarihi, 'dd/MM/yyyy') : '-'}">
+                            28/05/2026
+                        </td>
+
+                        <td>
+                            <span th:if="${rez.durum == 'BEKLEMEDE'}" class="badge-durum badge-beklemede">BEKLEMEDE</span>
+                            <span th:if="${rez.durum == 'ONAYLANDI'}" class="badge-durum badge-onaylandi">ONAYLANDI</span>
+                            <span th:if="${rez.durum == 'HAZIR'}" class="badge-durum badge-hazir">HAZIR</span>
+                            <span th:if="${rez.durum == 'IPTAL'}" class="badge-durum badge-iptal">İPTAL</span>
+                        </td>
+
+                        <td th:text="${rez.aciklama != null ? rez.aciklama : '-'}">-</td>
+
+                        <td>
+                            <button th:if="${rez.durum == 'BEKLEMEDE'}"
+                                    type="button"
+                                    class="btn btn-sm btn-outline-danger"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#cancelUserReservationModal"
+                                    th:data-url="@{/user/rezervasyon-iptal/{id}(id=${rez.id})}"
+                                    th:data-book-name="${rez.kitap != null ? rez.kitap.baslik : 'Bu rezervasyon'}">
+                                İptal Et
+                            </button>
+
+                            <span th:if="${rez.durum != 'BEKLEMEDE'}" class="text-muted">
+                                İşlem yok
+                            </span>
+                        </td>
+                    </tr>
+
+                    <tr th:if="${#lists.isEmpty(rezervasyonlar)}">
+                        <td colspan="7" class="text-center text-muted py-4">
+                            <i class="fa-solid fa-calendar-check fa-2x mb-2 d-block"></i>
+                            Henüz rezervasyonunuz bulunmuyor.
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<div class="modal fade" id="cancelUserReservationModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius:18px;border:none;">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold">
+                    <i class="fa-solid fa-triangle-exclamation text-warning me-2"></i>
+                    Rezervasyon İptal Edilsin mi?
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+                <p class="mb-1">
+                    <strong id="cancelUserReservationName">Bu rezervasyon</strong> iptal edilecek.
+                </p>
+                <p class="text-muted mb-0" style="font-size:14px">
+                    Bu işlem rezervasyonunuzu iptal eder.
+                </p>
+            </div>
+
+            <div class="modal-footer border-0">
+                <button type="button"
+                        class="btn btn-light px-4"
+                        data-bs-dismiss="modal"
+                        style="border-radius:10px">
+                    Vazgeç
+                </button>
+
+                <a id="confirmCancelUserReservationBtn"
+                   href="#"
+                   class="btn btn-warning px-4"
+                   style="border-radius:10px;font-weight:600">
+                    <i class="fa-solid fa-xmark me-2"></i>İptal Et
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const cancelUserReservationModal = document.getElementById('cancelUserReservationModal');
+
+        if (cancelUserReservationModal) {
+            cancelUserReservationModal.addEventListener('show.bs.modal', function(event) {
+                const button = event.relatedTarget;
+                const url = button.getAttribute('data-url');
+                const bookName = button.getAttribute('data-book-name');
+
+                document.getElementById('confirmCancelUserReservationBtn').setAttribute('href', url);
+                document.getElementById('cancelUserReservationName').textContent = bookName || 'Bu rezervasyon';
+            });
+        }
+    });
+</script>
+
+</body>
+</html>

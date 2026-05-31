@@ -724,6 +724,7 @@
                             <th>İade/Son İade Tarihi</th>
                             <th>Kalan Gün</th>
                             <th>Durum</th>
+                            <th>İşlem</th>
                         </tr>
                     </thead>
                     <tbody id="userOduncBody">
@@ -743,9 +744,17 @@
                                     Devam Edenler
                                 </span>
                             </td>
+                            <td>
+                                <button th:if="${odunc.durum != 'TAMAMLANDI' and odunc.durum != 'TESLIM_EDILDI' and odunc.durum != 'GECIKMIS' and !odunc.uzatildiMi}" 
+                                        class="btn btn-sm btn-outline-primary" style="padding: 0.25rem 0.5rem; font-size: 0.75rem; border: 1px solid var(--primary); color: var(--primary); background: transparent;"
+                                        th:onclick="'uzatSure(' + ${odunc.id} + ')'">
+                                    Süreyi Uzat
+                                </button>
+                                <span th:if="${odunc.durum != 'TAMAMLANDI' and odunc.durum != 'TESLIM_EDILDI' and odunc.durum != 'GECIKMIS' and odunc.uzatildiMi}" class="text-muted" style="font-size: 0.75rem; font-weight: 600;">Uzaltıldı</span>
+                            </td>
                         </tr>
                         <tr th:if="${#lists.isEmpty(oduncler)}">
-                            <td colspan="6" class="text-center" style="padding: 2rem;">Hiç ödünç aldığınız kitap bulunmamaktadır.</td>
+                            <td colspan="7" class="text-center" style="padding: 2rem;">Hiç ödünç aldığınız kitap bulunmamaktadır.</td>
                         </tr>
                     </tbody>
                 </table>
@@ -805,7 +814,7 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Kitap Listem Arama ve Filtreleme İşlemleri
+
             const oduncSearchInput = document.getElementById('oduncSearchInput');
             const oduncSortSelect = document.getElementById('oduncSortSelect');
             const statusFilters = document.querySelectorAll('.status-filter');
@@ -817,11 +826,11 @@
                 const sortMode = oduncSortSelect.value;
                 const rows = Array.from(userOduncBody.querySelectorAll('.odunc-row'));
                 
-                // Seçili durumları al
+
                 const selectedStatusCb = Array.from(statusFilters).find(cb => cb.checked);
                 const selectedStatus = selectedStatusCb ? selectedStatusCb.value : 'Tümü';
 
-                // Filtreleme
+
                 rows.forEach(row => {
                     const textContent = row.textContent.toLowerCase();
                     const statusText = row.querySelector('.status-badge').textContent.trim();
@@ -836,7 +845,7 @@
                     }
                 });
 
-                // Sıralama
+
                 if (sortMode !== 'default') {
                     const visibleRows = rows.filter(row => row.style.display !== 'none');
                     visibleRows.sort((a, b) => {
@@ -955,7 +964,7 @@
 
             if (btnPayPenalty) {
                 btnPayPenalty.addEventListener('click', function() {
-                    // Seçilenlerin toplam tutarını hesapla
+
                     let total = 0;
                     const selectedCheckboxes = Array.from(penaltyCheckboxes).filter(cb => cb.checked);
                     
@@ -1075,7 +1084,7 @@
                                 <td><span class="status-badge status-returned" style="background-color: #def7ec; color: #03543f;">İade Edildi</span></td>
                             `;
                             
-                            // Eklenen yeni satırı üst kısma koyuyoruz, fitreleri de tekrar uyguluyoruz
+
                             userOduncBody.insertBefore(newRow, userOduncBody.firstChild);
                             applyOduncFilters();
                             updateInfoCards();
@@ -1201,5 +1210,26 @@
             </div>
         </div>
     </div>
+    <script>
+        function uzatSure(oduncId) {
+            if(confirm("Süreyi 15 gün uzatmak istediğinize emin misiniz? Bu işlem sadece 1 kez yapılabilir.")) {
+                fetch('/odunc-islemleri/uzat/' + oduncId, {
+                    method: 'POST'
+                })
+                .then(response => response.text().then(text => ({status: response.status, text: text})))
+                .then(data => {
+                    if(data.status === 200) {
+                        alert(data.text);
+                        location.reload();
+                    } else {
+                        alert("Hata: " + data.text);
+                    }
+                })
+                .catch(err => {
+                    alert("Bir hata oluştu: " + err);
+                });
+            }
+        }
+    </script>
 </body>
 </html>

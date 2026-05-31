@@ -118,18 +118,19 @@
             vertical-align: middle;
         }
         
-        .form-control, .form-select { 
-            border-radius: 12px; 
-            border: 1px solid rgba(255, 255, 255, 0.8); 
-            background: rgba(255, 255, 255, 0.7);
-            font-size: 14px; 
-            padding: 10px 15px;
-        }
-        .form-control:focus, .form-select:focus { 
-            border-color: #4f46e5; 
-            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1); 
-            background: #fff;
-        }
+          .form-control, .form-select, .ts-wrapper .ts-control { 
+              border-radius: 12px; 
+              border: 1px solid #ced4da !important; 
+              background: #ffffff !important;
+              font-size: 14px; 
+              padding: 10px 15px;
+              box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);
+          }
+          .form-control:focus, .form-select:focus, .ts-wrapper.focus .ts-control { 
+              border-color: #4f46e5 !important; 
+              box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2) !important; 
+              background: #fff !important;
+          }
         
         /* Buttons glassmorphism */
         .btn-outline-secondary, .btn-outline-primary {
@@ -143,18 +144,18 @@
         .ts-wrapper.form-select { padding: 0 !important; border: none !important; background: transparent !important; }
         .ts-wrapper .ts-control {
             border-radius: 12px !important;
-            border: 1px solid rgba(255, 255, 255, 0.8) !important;
-            background: rgba(255, 255, 255, 0.7) !important;
+            border: 1px solid #ced4da !important;
+            background: #ffffff !important;
             font-size: 14px !important;
             font-family: 'Inter', sans-serif !important;
             min-height: 43px;
             padding: 8px 40px 8px 14px !important;
-            box-shadow: none !important;
+            box-shadow: inset 0 1px 2px rgba(0,0,0,0.05) !important;
             cursor: pointer;
         }
         .ts-wrapper.focus .ts-control {
             border-color: #4f46e5 !important;
-            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1) !important;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2) !important;
             background: #fff !important;
         }
         .ts-dropdown {
@@ -199,7 +200,7 @@
 <div th:replace="~{staff/sidebar :: sidebar}" id="sidebar" class="sidebar">
     <!-- Statik önizleme için (Thymeleaf çalıştırılmadığında tarayıcının göreceği kod) -->
     <div class="sidebar-header">
-        <h5 class="sidebar-title m-0">Library Staff</h5>
+        <h5 class="sidebar-title m-0" th:text="${session.aktifKullanici != null ? session.aktifKullanici.ad + ' ' + session.aktifKullanici.soyad : 'Library Staff'}">Library Staff</h5>
         <button class="toggle-btn" id="sidebarToggle"><i class="fa-solid fa-bars"></i></button>
     </div>
     <ul class="nav flex-column mt-3">
@@ -427,11 +428,12 @@
                             <textarea class="form-control" name="aciklama" rows="1" placeholder="Varsa notunuzu yazın"></textarea>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label">Kitap Durumu</label>
-                            <select class="form-select" name="kitapDurumu">
-                                <option value="Iyi">İyi</option>
-                                <option value="Hasarli">Hasarlı</option>
-                                <option value="Eksik_Sayfa">Eksik Sayfa</option>
+                            <label for="kitapDurumu" class="form-label fw-bold text-dark">Kitap Durumu</label>
+                            <select class="form-select border-0 shadow-sm" id="kitapDurumu" name="kitapDurumu" style="background-color: #f8f9fa;">
+                                <option value="Iyi" selected>İyi (Hasarsız)</option>
+                                <option value="Hasarli">Hasarlı (50 TL Ceza)</option>
+                                <option value="Eksik_Sayfa">Eksik Sayfa (100 TL Ceza)</option>
+                                <option value="Kayip">Kayıp (300 TL Ceza)</option>
                             </select>
                         </div>
                         <button type="submit" class="btn btn-primary w-100 mt-2" style="border-radius: 8px; font-weight: 600;">
@@ -468,7 +470,7 @@
             }
         });
         
-        // Sayfa açıldığında varsayılan olarak tüm listeyi göster (aşağı kaydırma yapmadan)
+
         filterTable('all', false);
     });
 
@@ -480,13 +482,13 @@
         currentStatusFilter = status;
         currentlyShown = itemsPerPage; // Reset pagination
         
-        // Tablo gizliyse (sadece içeriği) görünür yapıyoruz
+
         if (!$('#oduncListContent').is(':visible')) {
             $('#oduncListContent').slideDown(300);
             $('#toggleListBtn').text('Gizle').removeClass('btn-outline-primary').addClass('btn-outline-secondary');
         }
         
-        // Başlığı ve Header rengini güncelliyoruz
+
         let title = "Tüm Ödünç İşlemleri";
         let headerColorClass = "text-dark";
         
@@ -500,10 +502,10 @@
         
         $('#listTitle').text(title).removeClass('text-dark text-success text-danger').addClass(headerColorClass);
 
-        // Arama, Durum ve Sıralamayı uygula
+
         applyFilters();
 
-        // Yumuşak kaydırma ile tabloya odaklanıyoruz (Sadece kartlara tıklandığında çalışır)
+
         if (shouldScroll) {
             $('html, body').animate({
                 scrollTop: $("#oduncListRow").offset().top - 50
@@ -523,7 +525,7 @@
         }
     }
 
-    // Arama ve Sıralama Olaylarını Dinleme
+
     $('#tableSearchInput').on('input', function() {
         currentlyShown = itemsPerPage;
         applyFilters();
@@ -541,7 +543,7 @@
         let $rows = $('.odunc-row');
         let visibleRows = [];
         
-        // 1. Filtreleme (Kart durumu ve Arama Kutusu)
+
         $rows.each(function() {
             let statusMatch = (currentStatusFilter === 'all' || $(this).data('status') === currentStatusFilter);
             let textMatch = $(this).text().toLowerCase().indexOf(searchTerm) > -1;
@@ -553,14 +555,14 @@
             }
         });
 
-        // "Gecikme Cezası" Sütununu Gizle/Göster
+
         if (currentStatusFilter === 'active') {
             $('#oduncTable th:eq(5), .odunc-row td:nth-child(6)').hide();
         } else {
             $('#oduncTable th:eq(5), .odunc-row td:nth-child(6)').show();
         }
 
-        // 2. Sıralama İşlemi
+
         if (sortMode !== 'default') {
             let rowArray = visibleRows;
             rowArray.sort(function(a, b) {
@@ -615,7 +617,7 @@
             });
         }
         
-        // Load More Butonu Kontrolü
+
         if (visibleRows.length > currentlyShown) {
             if ($('#loadMoreBtn').length === 0) {
                 $('#oduncTable').after('<div class="text-center mt-4 mb-2" id="loadMoreContainer"><button id="loadMoreBtn" class="btn btn-outline-primary fw-bold" style="border-radius: 8px; padding: 8px 24px;"><i class="fa-solid fa-arrow-down me-2"></i>Daha Fazla Yükle</button></div>');

@@ -25,8 +25,6 @@ public class StaffKullaniciController {
         return "staff/kullanicilar";
     }
 
-    // PERSONEL (STAFF) ÜYE SİLEMEZ.
-    // O yüzden delete metodu yok.
 
     @GetMapping("/durum/{id}")
     public String durumDegistir(@PathVariable int id) {

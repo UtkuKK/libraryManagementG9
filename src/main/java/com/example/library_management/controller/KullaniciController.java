@@ -81,7 +81,7 @@ public class KullaniciController {
         Kullanici mevcut = kullaniciRepository.findById(id).orElse(null);
 
         if (mevcut != null) {
-            // E-posta değiştiyse benzersizlik kontrolü
+
             if (!mevcut.getEmail().equalsIgnoreCase(form.getEmail())) {
                 if (kullaniciRepository.existsByEmail(form.getEmail())) {
                     redirectAttrs.addFlashAttribute("errorMessage",

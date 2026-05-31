@@ -85,7 +85,7 @@
 <div th:replace="~{admin/sidebar :: sidebar}" id="sidebar" class="sidebar">
     <!-- Statik önizleme için (Thymeleaf çalıştırılmadığında tarayıcının göreceği kod) -->
     <div class="sidebar-header">
-        <h5 class="sidebar-title m-0">Library Admin</h5>
+        <h5 class="sidebar-title m-0" th:text="${session.aktifKullanici != null ? session.aktifKullanici.ad + ' ' + session.aktifKullanici.soyad : 'Library Admin'}">Library Admin</h5>
         <button class="toggle-btn" id="sidebarToggle"><i class="fa-solid fa-bars"></i></button>
     </div>
     <ul class="nav flex-column mt-3">

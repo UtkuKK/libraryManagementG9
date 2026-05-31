@@ -6,5 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface OduncIslemiRepository extends JpaRepository<OduncIslemi, Integer> {
-    // JpaRepository sayesinde findAll(), save(), deleteById() gibi metodlar otomatik gelir.
+
 }

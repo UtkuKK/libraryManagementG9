@@ -24,8 +24,17 @@ public class Ceza {
     @Column(name = "aciklama")
     private String aciklama;
 
-    @Column(name = "odendi_mi")
-    private boolean odendiMi;
+    @Column(name = "odendi_mi", columnDefinition = "boolean default false")
+    private Boolean odendiMi = false;
+
+    @Column(name = "odenen_miktar", columnDefinition = "DECIMAL(10,2) DEFAULT 0.00")
+    private BigDecimal odenenMiktar = BigDecimal.ZERO;
+
+    @Column(name = "odeme_tarihi")
+    private java.time.LocalDate odemeTarihi;
+
+    @Column(name = "tahsil_eden_kullanici_id")
+    private Integer tahsilEdenKullaniciId;
 
 
     @Transient
@@ -42,7 +51,7 @@ public class Ceza {
     }
 
 
-    public Ceza(int kullaniciId, int oduncId, BigDecimal cezaMiktari, String aciklama, boolean odendiMi) {
+    public Ceza(int kullaniciId, int oduncId, BigDecimal cezaMiktari, String aciklama, Boolean odendiMi) {
         this.kullaniciId = kullaniciId;
         this.oduncId = oduncId;
         this.cezaMiktari = cezaMiktari;
@@ -51,7 +60,7 @@ public class Ceza {
     }
 
 
-    public Ceza(int id, int kullaniciId, int oduncId, BigDecimal cezaMiktari, String aciklama, boolean odendiMi) {
+    public Ceza(int id, int kullaniciId, int oduncId, BigDecimal cezaMiktari, String aciklama, Boolean odendiMi) {
         this.id = id;
         this.kullaniciId = kullaniciId;
         this.oduncId = oduncId;
@@ -75,8 +84,22 @@ public class Ceza {
     public String getAciklama() { return aciklama; }
     public void setAciklama(String aciklama) { this.aciklama = aciklama; }
 
-    public boolean isOdendiMi() { return odendiMi; }
-    public void setOdendiMi(boolean odendiMi) { this.odendiMi = odendiMi; }
+    public boolean isOdendiMi() {
+        return odendiMi != null && odendiMi;
+    }
+
+    public void setOdendiMi(Boolean odendiMi) {
+        this.odendiMi = odendiMi;
+    }
+
+    public BigDecimal getOdenenMiktar() { return odenenMiktar; }
+    public void setOdenenMiktar(BigDecimal odenenMiktar) { this.odenenMiktar = odenenMiktar; }
+
+    public java.time.LocalDate getOdemeTarihi() { return odemeTarihi; }
+    public void setOdemeTarihi(java.time.LocalDate odemeTarihi) { this.odemeTarihi = odemeTarihi; }
+
+    public Integer getTahsilEdenKullaniciId() { return tahsilEdenKullaniciId; }
+    public void setTahsilEdenKullaniciId(Integer tahsilEdenKullaniciId) { this.tahsilEdenKullaniciId = tahsilEdenKullaniciId; }
 
     public String getKullaniciAdi() { return kullaniciAdi; }
     public void setKullaniciAdi(String kullaniciAdi) { this.kullaniciAdi = kullaniciAdi; }

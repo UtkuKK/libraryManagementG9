@@ -92,33 +92,106 @@ public class CezaController {
 
     @PostMapping("/save")
     public String saveCeza(@ModelAttribute("yeniCeza") Ceza ceza,
-                           jakarta.servlet.http.HttpServletRequest request) {
+                           jakarta.servlet.http.HttpServletRequest request, jakarta.servlet.http.HttpSession session, org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes) {
+        String referer = request.getHeader("Referer");
+        String redirectUrl = "redirect:" + (referer != null ? referer : "/cezalar");
+
         cezaRepository.save(ceza);
 
-        String referer = request.getHeader("Referer");
-        return "redirect:" + (referer != null ? referer : "/cezalar");
+        return redirectUrl;
     }
 
-    @GetMapping("/delete/{id}")
+    @PostMapping("/delete/{id}")
     public String deleteCeza(@PathVariable int id,
-                             jakarta.servlet.http.HttpServletRequest request) {
-        cezaRepository.deleteById(id);
-
+                             jakarta.servlet.http.HttpServletRequest request,
+                             jakarta.servlet.http.HttpSession session,
+                             org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes) {
         String referer = request.getHeader("Referer");
-        return "redirect:" + (referer != null ? referer : "/cezalar");
+        String redirectUrl = "redirect:" + (referer != null ? referer : "/cezalar");
+
+        Kullanici aktifKullanici = (Kullanici) session.getAttribute("aktifKullanici");
+        if (aktifKullanici == null || !"ADMIN".equalsIgnoreCase(aktifKullanici.getRol())) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Hata: Silme işlemi için ADMIN yetkisi gereklidir.");
+            return redirectUrl;
+        }
+
+        cezaRepository.deleteById(id);
+        redirectAttributes.addFlashAttribute("successMessage", "Ceza kaydı başarıyla silindi.");
+        return redirectUrl;
     }
 
-    @GetMapping("/odeme/{id}")
-    public String cezaTahsilEt(@PathVariable int id,
-                               jakarta.servlet.http.HttpServletRequest request) {
+    @PostMapping("/tahsil-et/{id}")
+    public org.springframework.http.ResponseEntity<String> cezaTahsilEt(@PathVariable int id,
+                               @RequestParam(required = false) java.math.BigDecimal miktar,
+                               jakarta.servlet.http.HttpSession session) {
+        
+        Kullanici aktifKullanici = (Kullanici) session.getAttribute("aktifKullanici");
+
+
         Ceza bulunanCeza = cezaRepository.findById(id).orElse(null);
 
         if (bulunanCeza != null) {
-            bulunanCeza.setOdendiMi(true);
+            java.math.BigDecimal currentPaid = bulunanCeza.getOdenenMiktar() != null ? bulunanCeza.getOdenenMiktar() : java.math.BigDecimal.ZERO;
+            java.math.BigDecimal eklenecekMiktar = miktar;
+            
+            if (eklenecekMiktar != null && eklenecekMiktar.compareTo(java.math.BigDecimal.ZERO) < 0) {
+                return org.springframework.http.ResponseEntity.status(400).body("Ödenecek miktar 0'dan küçük olamaz.");
+            }
+            
+            if (eklenecekMiktar == null || eklenecekMiktar.compareTo(java.math.BigDecimal.ZERO) == 0) {
+                // Kısmi miktar girilmemişse, kalan borcun tamamını tahsil et
+                eklenecekMiktar = bulunanCeza.getCezaMiktari().subtract(currentPaid);
+            }
+
+            java.math.BigDecimal yeniOdenen = currentPaid.add(eklenecekMiktar);
+            
+            if (yeniOdenen.compareTo(bulunanCeza.getCezaMiktari()) >= 0) {
+                bulunanCeza.setOdendiMi(true);
+                bulunanCeza.setOdenenMiktar(bulunanCeza.getCezaMiktari());
+            } else {
+                bulunanCeza.setOdenenMiktar(yeniOdenen);
+            }
+            
+            bulunanCeza.setOdemeTarihi(java.time.LocalDate.now());
+            if (aktifKullanici != null) {
+                bulunanCeza.setTahsilEdenKullaniciId(aktifKullanici.getId());
+            }
+            
             cezaRepository.save(bulunanCeza);
+            return org.springframework.http.ResponseEntity.ok("Başarılı");
         }
 
-        String referer = request.getHeader("Referer");
-        return "redirect:" + (referer != null ? referer : "/cezalar");
+        return org.springframework.http.ResponseEntity.status(404).body("Ceza bulunamadı");
+    }
+
+    @GetMapping("/test-tahsil/{id}")
+    @ResponseBody
+    public String testTahsil(@PathVariable int id) {
+        try {
+            Ceza bulunanCeza = cezaRepository.findById(id).orElse(null);
+            if (bulunanCeza != null) {
+                java.math.BigDecimal currentPaid = bulunanCeza.getOdenenMiktar() != null ? bulunanCeza.getOdenenMiktar() : java.math.BigDecimal.ZERO;
+                java.math.BigDecimal eklenecekMiktar = bulunanCeza.getCezaMiktari().subtract(currentPaid);
+                java.math.BigDecimal yeniOdenen = currentPaid.add(eklenecekMiktar);
+                
+                if (yeniOdenen.compareTo(bulunanCeza.getCezaMiktari()) >= 0) {
+                    bulunanCeza.setOdendiMi(true);
+                    bulunanCeza.setOdenenMiktar(bulunanCeza.getCezaMiktari());
+                } else {
+                    bulunanCeza.setOdenenMiktar(yeniOdenen);
+                }
+                
+                bulunanCeza.setOdemeTarihi(java.time.LocalDate.now());
+                bulunanCeza.setTahsilEdenKullaniciId(1);
+                
+                cezaRepository.save(bulunanCeza);
+                return "SUCCESS";
+            }
+            return "NOT FOUND";
+        } catch (Exception e) {
+            java.io.StringWriter sw = new java.io.StringWriter();
+            e.printStackTrace(new java.io.PrintWriter(sw));
+            return "ERROR: " + e.getMessage() + "\n" + sw.toString();
+        }
     }
 }

@@ -42,6 +42,9 @@ public class OduncIslemi {
     @Column(name = "kitap_durumu")
     private String kitapDurumu;
 
+    @Column(name = "uzatildi_mi")
+    private Boolean uzatildiMi = false;
+
 
     @Transient
     private String kitapBaslik;
@@ -141,6 +144,14 @@ public class OduncIslemi {
 
     public String getKitapDurumu() { return kitapDurumu; }
     public void setKitapDurumu(String kitapDurumu) { this.kitapDurumu = kitapDurumu; }
+
+    public boolean isUzatildiMi() {
+        return uzatildiMi != null && uzatildiMi;
+    }
+
+    public void setUzatildiMi(Boolean uzatildiMi) {
+        this.uzatildiMi = uzatildiMi;
+    }
 
     public Integer getKitapStok() { return kitapStok; }
     public void setKitapStok(Integer kitapStok) { this.kitapStok = kitapStok; }

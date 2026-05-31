@@ -401,10 +401,10 @@
     </style>
 </head>
 <body>
-    <div th:replace="~{staff/sidebar :: sidebar}" id="sidebar" class="sidebar">
+<div th:replace="~{staff/sidebar :: sidebar}" id="sidebar" class="sidebar">
     <!-- Statik önizleme için -->
     <div class="sidebar-header">
-        <h5 class="sidebar-title m-0">Library Staff</h5>
+        <h5 class="sidebar-title m-0" th:text="${session.aktifKullanici != null ? session.aktifKullanici.ad + ' ' + session.aktifKullanici.soyad : 'Library Staff'}">Library Staff</h5>
         <button class="toggle-btn" id="sidebarToggle"><i class="fa-solid fa-bars"></i></button>
     </div>
     <ul class="nav flex-column mt-3">
@@ -454,13 +454,13 @@
             }
         });
     </script>
-    </div>
-    <div class="content-area">
-        <div class="container">
+</div>
+<div class="content-area">
+    <div class="container">
         <div class="header">
             <h1>Ceza İşlemleri</h1>
         </div>
-        
+
         <div class="card">
             <div class="toolbar" style="justify-content: space-between; gap: 1rem; align-items: center;">
                 <div style="display: flex; gap: 10px; flex: 1; align-items: center; flex-wrap: wrap;">
@@ -468,66 +468,67 @@
                     <div class="btn-group" role="group">
                         <input type="radio" class="btn-check" name="statusFilter" id="filterAll" value="Tümü" autocomplete="off" checked>
                         <label class="btn btn-outline-secondary" for="filterAll">Tümü</label>
-                      
+
                         <input type="radio" class="btn-check" name="statusFilter" id="filterUnpaid" value="Ödenmeyenler" autocomplete="off">
                         <label class="btn btn-outline-danger" for="filterUnpaid">Ödenmeyenler</label>
-                      
+
                         <input type="radio" class="btn-check" name="statusFilter" id="filterPaid" value="Ödenenler" autocomplete="off">
                         <label class="btn btn-outline-success" for="filterPaid">Ödenenler</label>
                     </div>
                 </div>
-                    
-                    <select id="tableSortSelect" class="form-select ms-2" style="max-width: 250px; padding: 0.5rem; border-radius: 6px; border: 1px solid #ccc;">
-                        <option value="default">Sıralama Seçiniz</option>
-                        <option value="az_kullanici">Kullanıcı (A-Z)</option>
-                        <option value="za_kullanici">Kullanıcı (Z-A)</option>
-                        <option value="az_kitap">Kitap (A-Z)</option>
-                        <option value="za_kitap">Kitap (Z-A)</option>
-                        <option value="ceza_cok">Ceza Miktarı (En Çok)</option>
-                        <option value="ceza_az">Ceza Miktarı (En Az)</option>
-                    </select>
+
+                <select id="tableSortSelect" class="form-select ms-2" style="max-width: 250px; padding: 0.5rem; border-radius: 6px; border: 1px solid #ccc;">
+                    <option value="default">Sıralama Seçiniz</option>
+                    <option value="az_kullanici">Kullanıcı (A-Z)</option>
+                    <option value="za_kullanici">Kullanıcı (Z-A)</option>
+                    <option value="az_kitap">Kitap (A-Z)</option>
+                    <option value="za_kitap">Kitap (Z-A)</option>
+                    <option value="ceza_cok">Ceza Miktarı (En Çok)</option>
+                    <option value="ceza_az">Ceza Miktarı (En Az)</option>
+                </select>
 
                 <button id="btnNakitTahsilEt" class="btn btn-success" disabled>
                     <svg style="width: 1.25rem; height: 1.25rem; margin-right: 0.5rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                     Nakit Tahsil Et
                 </button>
             </div>
-            
+
             <div class="table-container">
                 <table id="cezaTable">
                     <thead>
-                        <tr>
-                            <th class="checkbox-cell"></th>
-                            <th>Ceza ID</th>
-                            <th>Kullanıcı</th>
-                            <th>Kitap (Geciken)</th>
-                            <th>Gecikme Süresi</th>
-                            <th>Ceza Miktarı</th>
-                            <th>Açıklama</th>
-                            <th>Durum</th>
-                        </tr>
+                    <tr>
+                        <th class="checkbox-cell"></th>
+                        <th>Ceza ID</th>
+                        <th>Kullanıcı</th>
+                        <th>Kitap (Geciken)</th>
+                        <th>Gecikme Süresi</th>
+                        <th>Ceza Miktarı</th>
+                        <th>Açıklama</th>
+                        <th>Durum</th>
+                    </tr>
                     </thead>
                     <tbody>
-                        <tr th:each="ceza : ${cezalar}" th:data-id="${ceza.id}">
-                            <td class="checkbox-cell">
-                                <input type="checkbox" class="custom-checkbox row-checkbox" th:value="${ceza.id}">
-                            </td>
-                            <td th:text="'#' + ${ceza.id}">#502</td>
-                            <td th:text="${ceza.kullaniciAdi != null ? ceza.kullaniciAdi : ceza.kullaniciId}">Ayşe Demir</td>
-                            <td th:text="${ceza.kitapAdi != null ? ceza.kitapAdi : 'Bilinmiyor'}">Simyacı</td>
-                            <td>
-                                <span class="badge bg-danger text-white" th:if="${ceza.gecikmeGunu > 0}" th:text="${ceza.gecikmeGunu} + ' Gün'"></span>
-                                <span th:unless="${ceza.gecikmeGunu > 0}">-</span>
-                            </td>
-                            <td class="amount" th:text="${ceza.cezaMiktari} + ' ₺'">25.00 ₺</td>
-                            <td class="description-cell" th:title="${ceza.aciklama}" th:text="${ceza.aciklama}">Açıklama</td>
-                            <td>
-                                <span class="status-badge" th:classappend="${ceza.odendiMi ? 'status-paid' : 'status-unpaid'}" th:text="${ceza.odendiMi ? 'Ödendi' : 'Ödenmedi'}">Ödenmedi</span>
-                            </td>
-                        </tr>
-                        <tr th:if="${#lists.isEmpty(cezalar)}">
-                            <td colspan="8" style="text-align: center; color: #64748b; padding: 2rem;">Sistemde herhangi bir ceza kaydı bulunamadı.</td>
-                        </tr>
+                    <tr th:each="ceza : ${cezalar}" th:data-id="${ceza.id}" th:data-kalan="${ceza.cezaMiktari - (ceza.odenenMiktar != null ? ceza.odenenMiktar : 0)}">
+                        <td class="checkbox-cell">
+                            <input type="checkbox" class="custom-checkbox row-checkbox" th:value="${ceza.id}">
+                        </td>
+                        <td th:text="'#' + ${ceza.id}">#502</td>
+                        <td th:text="${ceza.kullaniciAdi != null ? ceza.kullaniciAdi : ceza.kullaniciId}">Ayşe Demir</td>
+                        <td th:text="${ceza.kitapAdi != null ? ceza.kitapAdi : 'Bilinmiyor'}">Simyacı</td>
+                        <td>
+                            <span class="badge bg-danger text-white" th:if="${ceza.gecikmeGunu > 0}" th:text="${ceza.gecikmeGunu} + ' Gün'"></span>
+                            <span th:unless="${ceza.gecikmeGunu > 0}">-</span>
+                        </td>
+                        <td class="amount text-muted" th:text="${ceza.cezaMiktari} + ' ₺'" style="text-decoration: line-through;" th:if="${ceza.odendiMi}">25.00 ₺</td>
+                        <td class="amount text-danger" th:text="${ceza.cezaMiktari - (ceza.odenenMiktar != null ? ceza.odenenMiktar : 0)} + ' ₺'" th:unless="${ceza.odendiMi}">25.00 ₺</td>
+                        <td class="description-cell" th:title="${ceza.aciklama}" th:text="${ceza.aciklama}">Açıklama</td>
+                        <td>
+                            <span class="status-badge" th:classappend="${ceza.odendiMi ? 'status-paid' : 'status-unpaid'}" th:text="${ceza.odendiMi ? 'Ödendi' : 'Ödenmedi'}">Ödenmedi</span>
+                        </td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(cezalar)}">
+                        <td colspan="8" style="text-align: center; color: #64748b; padding: 2rem;">Sistemde herhangi bir ceza kaydı bulunamadı.</td>
+                    </tr>
                     </tbody>
                 </table>
             </div>
@@ -545,6 +546,17 @@
             </div>
             <div class="modal-body">
                 <p id="tahsilatModalText">Seçili cezaları tahsil etmek istediğinize emin misiniz?</p>
+                <div id="partialPaymentDiv" style="display: none; margin-top: 15px; padding-top: 15px; border-top: 1px solid #e2e8f0;">
+                    <div class="form-check form-switch mb-3" style="display: flex; align-items: center; justify-content: center; gap: 10px;">
+                        <input class="form-check-input" type="checkbox" id="tumunuOdeCheck" checked style="margin-top: 0; width: 40px; height: 20px;">
+                        <label class="form-check-label" for="tumunuOdeCheck" style="font-weight: 600; cursor: pointer;">Tüm Kalan Borcu Öde</label>
+                    </div>
+                    <div id="miktarGirisAlani" style="display: none; text-align: left; background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px solid #e2e8f0;">
+                        <label for="odenecekMiktarInput" class="form-label" style="font-weight: 600; font-size: 0.9rem;">Ödenecek Miktar (TL):</label>
+                        <input type="number" id="odenecekMiktarInput" class="form-control" placeholder="Örn: 50.00" step="0.01" min="0.01">
+                        <small id="kalanBorcYardimci" class="text-danger d-block mt-1" style="font-weight: 500;"></small>
+                    </div>
+                </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" id="btnCancelModal">İptal</button>
@@ -589,7 +601,7 @@
                 });
             });
 
-            // Modal İşlemleri
+
             const modalOverlay = document.getElementById('tahsilatModalOverlay');
             const btnCloseModal = document.getElementById('btnCloseModal');
             const btnCancelModal = document.getElementById('btnCancelModal');
@@ -608,7 +620,7 @@
                 if (e.target === modalOverlay) closeModal();
             });
 
-            // Tahsil Et Butonu click event (Modalı Açma)
+
             let selectedIdsToPay = [];
 
             if (btnNakitTahsilEt) {
@@ -618,40 +630,147 @@
                     
                     if (selectedIdsToPay.length > 0) {
                         const modalText = document.getElementById('tahsilatModalText');
+                        const partialDiv = document.getElementById('partialPaymentDiv');
+                        const miktarInput = document.getElementById('odenecekMiktarInput');
+                        
                         if(modalText) {
                             modalText.innerHTML = `<strong>${selectedIdsToPay.length}</strong> adet ceza ödemesini tahsil etmek ve kapatmak istediğinize emin misiniz?`;
                         }
+                        
+                        if (selectedIdsToPay.length === 1 && partialDiv) {
+                            partialDiv.style.display = 'block';
+                            
+                            const selectedRow = document.querySelector('.selected-row');
+                            const kalanMiktar = parseFloat(selectedRow.getAttribute('data-kalan'));
+                            
+                            const tumunuOdeCheck = document.getElementById('tumunuOdeCheck');
+                            const miktarGirisAlani = document.getElementById('miktarGirisAlani');
+                            const kalanBorcYardimci = document.getElementById('kalanBorcYardimci');
+                            
+                            if (tumunuOdeCheck) tumunuOdeCheck.checked = true;
+                            if (miktarGirisAlani) miktarGirisAlani.style.display = 'none';
+                            
+                            if (miktarInput) {
+                                miktarInput.value = '';
+                                miktarInput.max = kalanMiktar;
+                                
+                                miktarInput.oninput = function() {
+                                    if (parseFloat(this.value) > kalanMiktar) {
+                                        this.value = kalanMiktar;
+                                    }
+                                };
+                            }
+                            
+                            if (kalanBorcYardimci) {
+                                kalanBorcYardimci.textContent = `Uyarı: En fazla ${kalanMiktar} ₺ ödeyebilirsiniz.`;
+                            }
+                            
+                            if (tumunuOdeCheck) {
+                                tumunuOdeCheck.onchange = function() {
+                                    if (this.checked) {
+                                        if (miktarGirisAlani) miktarGirisAlani.style.display = 'none';
+                                        if (miktarInput) miktarInput.value = '';
+                                    } else {
+                                        if (miktarGirisAlani) miktarGirisAlani.style.display = 'block';
+                                        if (miktarInput) miktarInput.focus();
+                                    }
+                                };
+                            }
+                            
+                        } else if (partialDiv) {
+                            partialDiv.style.display = 'none';
+                        }
+                        
                         openModal();
                     }
                 });
             }
 
-            // Modal Onayla Butonu
+
             const btnModalOnayla = document.getElementById('btnModalOnayla');
             if (btnModalOnayla) {
                 btnModalOnayla.addEventListener('click', function() {
-                    // Butonu disabled yap ve metni değiştir (Loading durumu)
+                    //
                     this.disabled = true;
                     this.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>İşleniyor...';
-                    
+
                     processPayments(selectedIdsToPay);
                 });
             }
 
-            // Ödemeleri arka planda işleyen fonksiyon
+            //
             function processPayments(ids) {
-                const requests = ids.map(id => fetch(`/cezalar/tahsil-et/${id}`));
-                
+                const miktarInput = document.getElementById('odenecekMiktarInput');
+                const tumunuOdeCheck = document.getElementById('tumunuOdeCheck');
+                let queryParam = '';
+
+
+                if (ids.length === 1 && tumunuOdeCheck && !tumunuOdeCheck.checked && miktarInput && miktarInput.value && parseFloat(miktarInput.value) > 0) {
+                    queryParam = `?miktar=${parseFloat(miktarInput.value)}`;
+                }
+
+                const requests = ids.map(id => fetch(`/cezalar/tahsil-et/${id}${queryParam}`, { method: 'POST' }).then(async res => {
+                    if (!res.ok) {
+                        const errText = await res.text();
+                        throw new Error(errText || "Sunucu hatası: " + res.status);
+                    }
+                    return res;
+                }));
+
                 Promise.all(requests).then(() => {
-                    window.location.reload();
+                    ids.forEach(id => {
+                        const row = document.querySelector(`tr[data-id="${id}"]`);
+                        if(row) {
+                            const badge = row.querySelector('.status-badge');
+                            if(badge) {
+                                badge.classList.remove('status-unpaid');
+                                badge.classList.add('status-paid');
+                                badge.textContent = 'Ödendi';
+                            }
+                            const amountCell = row.querySelector('td.amount');
+                            if (amountCell && queryParam === '') {
+                                amountCell.classList.remove('text-danger');
+                                amountCell.classList.add('text-muted');
+                                amountCell.style.textDecoration = 'line-through';
+                            } else if (amountCell && queryParam !== '') {
+                                const currentKalan = parseFloat(row.getAttribute('data-kalan'));
+                                const odenen = parseFloat(miktarInput.value);
+                                const yeniKalan = currentKalan - odenen;
+                                if (yeniKalan <= 0) {
+                                    amountCell.classList.remove('text-danger');
+                                    amountCell.classList.add('text-muted');
+                                    amountCell.style.textDecoration = 'line-through';
+                                    if(badge) {
+                                        badge.classList.remove('status-unpaid');
+                                        badge.classList.add('status-paid');
+                                        badge.textContent = 'Ödendi';
+                                    }
+                                } else {
+                                    amountCell.textContent = yeniKalan.toFixed(2) + ' ₺';
+                                    row.setAttribute('data-kalan', yeniKalan);
+                                }
+                            }
+                            row.classList.remove('selected-row');
+                            const cb = row.querySelector('.row-checkbox');
+                            if(cb) cb.checked = false;
+                        }
+                    });
+                    closeModal();
+                    updateButtonState();
                 }).catch(err => {
                     console.error("Tahsilat sırasında hata oluştu:", err);
-                    alert("Tahsilat işlemi sırasında bir hata oluştu.");
+                    alert("Tahsilat işlemi başarısız: " + err.message);
                     closeModal();
+                }).finally(() => {
+                    const btnOnayla = document.getElementById('btnModalOnayla');
+                    if (btnOnayla) {
+                        btnOnayla.disabled = false;
+                        btnOnayla.innerHTML = 'Onayla ve Tahsil Et';
+                    }
                 });
             }
 
-            // Arama, Filtreleme ve Sıralama İşlemleri
+
             const cezaSearchInput = document.getElementById('cezaSearchInput');
             const statusFilters = document.querySelectorAll('input[name="statusFilter"]');
             const tbody = document.querySelector('tbody');
@@ -780,10 +899,10 @@
                 });
             });
             
-            // Sayfa açılışında çalıştır
+
             applyFilters();
         });
     </script>
-    </div>
+</div>
 </body>
 </html>

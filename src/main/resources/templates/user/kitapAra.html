@@ -137,7 +137,7 @@
                         <th>Yazar</th>
                         <th>Kategori</th>
                         <th>Yayınevi</th>
-                        <th>Raf Yeri</th>
+
                         <th>Yıl</th>
                         <th>Stok</th>
                         <th>İşlem</th>
@@ -160,7 +160,7 @@
                         <td th:text="${kitap.yazar != null ? kitap.yazar.adSoyad : '-'}">-</td>
                         <td th:text="${kitap.kategori != null ? kitap.kategori.ad : '-'}">-</td>
                         <td th:text="${kitap.yayinevi != null ? kitap.yayinevi.ad : '-'}">-</td>
-                        <td th:text="${kitap.rafYeri != null ? kitap.rafYeri : '-'}">-</td>
+
                         <td th:text="${kitap.yil > 0 ? kitap.yil : '-'}">-</td>
 
                         <td>
@@ -176,15 +176,14 @@
                         </td>
 
                         <td>
-                            <form th:if="${kitap.stok > 0}"
-                                  th:action="@{/user/rezervasyon-yap/{id}(id=${kitap.id})}"
-                                  method="post">
-                                <button type="submit"
-                                        class="btn btn-sm btn-success"
-                                        onclick="return confirm('Bu kitabı rezerve etmek istiyor musunuz?')">
-                                    <i class="fa-solid fa-calendar-plus me-1"></i>Rezerve Et
-                                </button>
-                            </form>
+                            <button th:if="${kitap.stok > 0}"
+                                    type="button"
+                                    class="btn btn-sm btn-success rezervasyonBtn"
+                                    th:data-kitapid="${kitap.id}"
+                                    th:data-kitapadi="${kitap.baslik}">
+
+                                <i class="fa-solid fa-calendar-plus me-1"></i>Rezerve Et
+                            </button>
 
                             <button th:if="${kitap.stok <= 0}"
                                     class="btn btn-sm btn-secondary"
@@ -195,7 +194,7 @@
                     </tr>
 
                     <tr th:if="${#lists.isEmpty(kitaplar)}">
-                        <td colspan="9" class="text-center text-muted py-4">
+                        <td colspan="8" class="text-center text-muted py-4">
                             <i class="fa-solid fa-book-open fa-2x mb-2 d-block"></i>
                             Aramanıza uygun kitap bulunamadı.
                         </td>
@@ -205,6 +204,48 @@
             </div>
         </div>
 
+    </div>
+</div>
+
+<div class="modal fade" id="rezervasyonModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fa-solid fa-book me-2"></i>
+                    Kitap Rezervasyonu
+                </h5>
+
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+                <p class="mb-0">
+                    <strong id="modalKitapAdi"></strong>
+                    isimli kitabı rezerve etmek istediğinize emin misiniz?
+                </p>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn btn-secondary"
+                        data-bs-dismiss="modal">
+                    Vazgeç
+                </button>
+
+                <form id="modalRezervasyonForm"
+                      method="post">
+
+                    <button type="submit"
+                            class="btn btn-success">
+                        Rezerve Et
+                    </button>
+                </form>
+            </div>
+
+        </div>
     </div>
 </div>
 
@@ -241,7 +282,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (!noResult) {
                 noResult = document.createElement('tr');
                 noResult.id = 'liveNoResult';
-                noResult.innerHTML = '<td colspan="9" class="text-center text-muted py-4"><i class="fa-solid fa-magnifying-glass fa-2x mb-2 d-block"></i>Aramanıza uygun kitap bulunamadı.</td>';
+                noResult.innerHTML = '<td colspan="8" class="text-center text-muted py-4"><i class="fa-solid fa-magnifying-glass fa-2x mb-2 d-block"></i>Aramanıza uygun kitap bulunamadı.</td>';
                 tbody.appendChild(noResult);
             }
             noResult.style.display = '';
@@ -270,6 +311,36 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     applyFilter();
+
+    const rezervasyonModal =
+    new bootstrap.Modal(
+        document.getElementById('rezervasyonModal')
+    );
+
+document.querySelectorAll('.rezervasyonBtn')
+    .forEach(btn => {
+
+        btn.addEventListener('click', function () {
+
+            const kitapId =
+                this.dataset.kitapid;
+
+            const kitapAdi =
+                this.dataset.kitapadi;
+
+            document.getElementById(
+                'modalKitapAdi'
+            ).textContent = kitapAdi;
+
+            document.getElementById(
+                'modalRezervasyonForm'
+            ).action =
+                '/user/rezervasyon-yap/' + kitapId;
+
+            rezervasyonModal.show();
+        });
+
+    });
 });
 </script>
 

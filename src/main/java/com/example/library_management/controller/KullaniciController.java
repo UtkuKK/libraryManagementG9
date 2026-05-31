@@ -2,9 +2,11 @@ package com.example.library_management.controller;
 
 import com.example.library_management.model.Kullanici;
 import com.example.library_management.repository.KullaniciRepository;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
 
@@ -26,8 +28,21 @@ public class KullaniciController {
     }
 
     @GetMapping("/delete/{id}")
-    public String deleteKullanici(@PathVariable int id) {
-        kullaniciRepository.deleteById(id);
+    public String deleteKullanici(@PathVariable int id,
+                                   jakarta.servlet.http.HttpSession session,
+                                   RedirectAttributes redirectAttrs) {
+        // Yöneticinin kendi hesabını silmesini engelle
+        Kullanici aktif = (Kullanici) session.getAttribute("aktifKullanici");
+        if (aktif != null && aktif.getId() == id) {
+            redirectAttrs.addFlashAttribute("errorMessage", "Kendi hesabınızı silemezsiniz.");
+            return "redirect:/admin/kullanicilar";
+        }
+        try {
+            kullaniciRepository.deleteById(id);
+        } catch (DataIntegrityViolationException e) {
+            redirectAttrs.addFlashAttribute("errorMessage",
+                "Bu kullanıcı silinemiyor: Aktif ödünç, rezervasyon veya ceza kaydı bulunuyor.");
+        }
         return "redirect:/admin/kullanicilar";
     }
 
@@ -60,11 +75,20 @@ public class KullaniciController {
 
     @PostMapping("/update/{id}")
     public String updateKullanici(@PathVariable int id,
-                                  @ModelAttribute Kullanici form) {
+                                  @ModelAttribute Kullanici form,
+                                  RedirectAttributes redirectAttrs) {
 
         Kullanici mevcut = kullaniciRepository.findById(id).orElse(null);
 
         if (mevcut != null) {
+            // E-posta değiştiyse benzersizlik kontrolü
+            if (!mevcut.getEmail().equalsIgnoreCase(form.getEmail())) {
+                if (kullaniciRepository.existsByEmail(form.getEmail())) {
+                    redirectAttrs.addFlashAttribute("errorMessage",
+                        "Bu e-posta adresi zaten başka bir kullanıcı tarafından kullanılıyor.");
+                    return "redirect:/admin/kullanicilar/duzenle/" + id;
+                }
+            }
             mevcut.setAd(form.getAd());
             mevcut.setSoyad(form.getSoyad());
             mevcut.setEmail(form.getEmail());

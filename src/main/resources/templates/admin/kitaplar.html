@@ -236,9 +236,8 @@
                         <th class="sortable-th" data-sort-index="2" data-sort-type="text">Yazar <i class="fa-solid fa-sort"></i></th>
                         <th class="sortable-th" data-sort-index="3" data-sort-type="text">Kategori <i class="fa-solid fa-sort"></i></th>
                         <th class="sortable-th" data-sort-index="4" data-sort-type="text">Yayınevi <i class="fa-solid fa-sort"></i></th>
-                        <th class="sortable-th" data-sort-index="5" data-sort-type="text">Raf Yeri <i class="fa-solid fa-sort"></i></th>
-                        <th class="sortable-th" data-sort-index="6" data-sort-type="number">Yıl <i class="fa-solid fa-sort"></i></th>
-                        <th class="sortable-th" data-sort-index="7" data-sort-type="number">Stok <i class="fa-solid fa-sort"></i></th>
+                        <th class="sortable-th" data-sort-index="5" data-sort-type="number">Yıl <i class="fa-solid fa-sort"></i></th>
+                        <th class="sortable-th" data-sort-index="6" data-sort-type="number">Stok <i class="fa-solid fa-sort"></i></th>
                         <th>İşlemler</th>
                     </tr>
                     </thead>
@@ -260,7 +259,6 @@
                         <td th:text="${kitap.yazar != null ? kitap.yazar.adSoyad : '-'}">-</td>
                         <td th:text="${kitap.kategori != null ? kitap.kategori.ad : '-'}">-</td>
                         <td th:text="${kitap.yayinevi != null ? kitap.yayinevi.ad : '-'}">-</td>
-                        <td th:text="${kitap.rafYeri != null and !kitap.rafYeri.isEmpty() ? kitap.rafYeri : '-'}">-</td>
                         <td th:text="${kitap.yil > 0 ? kitap.yil : '-'}">-</td>
 
                         <td>
@@ -301,7 +299,7 @@
                     </tr>
 
                     <tr th:if="${#lists.isEmpty(kitaplar)}">
-                        <td colspan="9" class="text-center text-muted py-4">
+                        <td colspan="8" class="text-center text-muted py-4">
                             <i class="fa-solid fa-book-open fa-2x mb-2 d-block"></i>
                             Henüz kitap eklenmemiş.
                         </td>
@@ -398,14 +396,6 @@
                                    required>
                         </div>
 
-                        <div class="col-md-4">
-                            <label class="form-label">Raf Yeri *</label>
-                            <input type="text"
-                                   class="form-control"
-                                   th:field="*{rafYeri}"
-                                   placeholder="Örn:Raf B-12"
-                                   required>
-                        </div>
 
                         <div class="col-md-12">
                             <label class="form-label">Açıklama</label>
@@ -505,15 +495,6 @@
                                    required>
                         </div>
 
-                        <div class="col-md-4">
-                            <label class="form-label">Raf Yeri *</label>
-                            <input type="text"
-                                   class="form-control"
-                                   name="rafYeri"
-                                   th:value="${duzenlenecekKitap.rafYeri}"
-                                   placeholder="Örn: Aisle 8 / Raf B-12"
-                                   required>
-                        </div>
 
                         <div class="col-md-12">
                             <label class="form-label">Açıklama</label>

@@ -35,11 +35,10 @@ public class RezervasyonlarController {
             Kitaplar kitap = rezervasyon.getKitap();
 
             if (kitap != null && kitap.getStok() > 0) {
-                kitap.setStok(kitap.getStok() - 1);
-                kitaplarRepository.save(kitap);
 
-                rezervasyon.setDurum("ONAYLANDI");
-                rezervasyon.setAciklama("Rezervasyon personel tarafından onaylandı.");
+
+                rezervasyon.setDurum("HAZIR");
+                rezervasyon.setAciklama("Rezervasyon onaylandı. Kitap teslim için hazır.");
                 rezervasyonlarRepository.save(rezervasyon);
             } else {
                 rezervasyon.setAciklama("Stok bulunmadığı için rezervasyon onaylanamadı.");
@@ -75,14 +74,7 @@ public class RezervasyonlarController {
 
         if (rezervasyon != null && !"IPTAL".equals(rezervasyon.getDurum())) {
 
-            if ("ONAYLANDI".equals(rezervasyon.getDurum()) || "HAZIR".equals(rezervasyon.getDurum())) {
-                Kitaplar kitap = rezervasyon.getKitap();
 
-                if (kitap != null) {
-                    kitap.setStok(kitap.getStok() + 1);
-                    kitaplarRepository.save(kitap);
-                }
-            }
 
             rezervasyon.setDurum("IPTAL");
             rezervasyon.setAciklama("Rezervasyon personel tarafından iptal edildi.");

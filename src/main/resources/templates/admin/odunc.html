@@ -172,6 +172,26 @@
         .ts-dropdown .option.selected { background: #dbeafe !important; color: #1d4ed8 !important; font-weight: 600; }
         .ts-control input { font-family: 'Inter', sans-serif !important; font-size: 14px !important; }
         .bg-active-yellow { background-color: #eab308 !important; color: white !important; }
+        .modern-sort-select {
+    max-width: 300px;
+    height: 43px;
+    border-radius: 12px !important;
+    border: 1px solid rgba(255, 255, 255, 0.9) !important;
+    background: rgba(255, 255, 255, 0.75) !important;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    font-size: 13px !important;
+    font-weight: 500;
+    color: #334155;
+    padding: 8px 14px !important;
+    box-shadow: 0 6px 18px rgba(15, 23, 42, 0.06);
+}
+
+.modern-sort-select:focus {
+    border-color: #4f46e5 !important;
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.12) !important;
+    outline: none;
+}
     </style>
 </head>
 <body>
@@ -286,7 +306,7 @@
                 <div id="oduncListContent">
                     <div class="toolbar" style="gap: 1rem; flex-wrap: wrap;">
                         <input type="text" id="tableSearchInput" class="form-control" placeholder="Kullanıcı, Kitap veya Barkod ara..." style="max-width: 350px; padding: 0.5rem; border-radius: 6px; border: 1px solid #ccc; flex: 1;">
-                        <select id="tableSortSelect" class="form-select" style="max-width: 300px; padding: 0.5rem; border-radius: 6px; border: 1px solid #ccc;">
+                        <select id="tableSortSelect" class="form-select modern-sort-select">
                             <option value="default">Sıralama Seçiniz (Varsayılan)</option>
                             <option value="az_kullanici">Kullanıcı (A-Z)</option>
                             <option value="za_kullanici">Kullanıcı (Z-A)</option>

@@ -227,10 +227,10 @@
                         <th class="sortable-th" data-sort-index="0" data-sort-type="number"># <i class="fa-solid fa-sort"></i></th>
                         <th class="sortable-th" data-sort-index="1" data-sort-type="text">Kullanıcı <i class="fa-solid fa-sort"></i></th>
                         <th class="sortable-th" data-sort-index="2" data-sort-type="text">Kitap <i class="fa-solid fa-sort"></i></th>
-                        <th class="sortable-th" data-sort-index="3" data-sort-type="text">Raf Yeri <i class="fa-solid fa-sort"></i></th>
-                        <th class="sortable-th" data-sort-index="4" data-sort-type="date">Rezervasyon Tarihi <i class="fa-solid fa-sort"></i></th>
-                        <th class="sortable-th" data-sort-index="5" data-sort-type="text">Durum <i class="fa-solid fa-sort"></i></th>
-                        <th class="sortable-th" data-sort-index="6" data-sort-type="text">Açıklama <i class="fa-solid fa-sort"></i></th>
+
+                        <th class="sortable-th" data-sort-index="3" data-sort-type="date">Rezervasyon Tarihi <i class="fa-solid fa-sort"></i></th>
+                        <th class="sortable-th" data-sort-index="4" data-sort-type="text">Durum <i class="fa-solid fa-sort"></i></th>
+                        <th class="sortable-th" data-sort-index="5" data-sort-type="text">Açıklama <i class="fa-solid fa-sort"></i></th>
                         <th>İşlemler</th>
                     </tr>
                     </thead>
@@ -259,7 +259,7 @@
                             </div>
                         </td>
 
-                        <td th:text="${rez.kitap != null and rez.kitap.rafYeri != null ? rez.kitap.rafYeri : '-'}">-</td>
+
 
                         <td th:text="${rez.rezervasyonTarihi != null ? #temporals.format(rez.rezervasyonTarihi, 'dd/MM/yyyy') : '-'}">
                             28/05/2026
@@ -298,13 +298,7 @@
                                 <i class="fa-solid fa-check"></i>
                             </a>
 
-                            <a th:if="${rez.durum == 'ONAYLANDI'}"
-                               th:href="@{/admin/rezervasyonlar/hazir/{id}(id=${rez.id})}"
-                               class="btn-icon ms-1"
-                               style="background:#f0fdf4;color:#16a34a;"
-                               title="Hazır Yap">
-                                <i class="fa-solid fa-box-open"></i>
-                            </a>
+
 
                             <button th:if="${rez.durum != 'IPTAL'}"
                                     type="button"
@@ -332,7 +326,7 @@
                     </tr>
 
                     <tr th:if="${#lists.isEmpty(rezervasyonlar)}">
-                        <td colspan="8" class="text-center text-muted py-4">
+                        <td colspan="7" class="text-center text-muted py-4">
                             <i class="fa-solid fa-calendar-check fa-2x mb-2 d-block"></i>
                             Henüz rezervasyon bulunmuyor.
                         </td>
@@ -490,7 +484,7 @@
                 if (!noResult) {
                     noResult = document.createElement('tr');
                     noResult.id = 'rezervasyonNoResult';
-                    noResult.innerHTML = '<td colspan="8" class="text-center text-muted py-4"><i class="fa-solid fa-magnifying-glass fa-2x mb-2 d-block"></i>Aramanıza uygun rezervasyon bulunamadı.</td>';
+                    noResult.innerHTML = '<td colspan="7" class="text-center text-muted py-4"><i class="fa-solid fa-magnifying-glass fa-2x mb-2 d-block"></i>Aramanıza uygun rezervasyon bulunamadı.</td>';
                     tbody.appendChild(noResult);
                 }
                 noResult.style.display = '';
